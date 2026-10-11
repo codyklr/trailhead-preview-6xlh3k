@@ -6,19 +6,15 @@ var Dither=(function(){
   var P={"_help":"House dither style: ONE source of truth for build scripts (tools/dither.py), the build (CSS vars, --dp) and the runtime (src/dither.js is inlined into main.js).","dither":{"matrix":"bayer8","dpDesktop":3,"dpMobile":2,"mobileMaxWidth":720},"ink":"#14201a","photo":["#16201b","#24392e","#2c4a3b","#4f7a62","#8fae98","#7b8179","#b9b49f","#d9d0b8","#f1ebdd","#c4572a","#e38a52"],"light":{"scene":["#16201b","#2c4a3b","#c4572a","#f1ebdd"],"ocean":["#16221c","#33463c","#7d8f80","#c9cfbd"],"land":["#16221c","#2c4a3b","#4f7a62","#a2c2a0"],"halo":"#6f9a7f","star":"#16221c","arc":"#d2622f","arcHi":"#f3ecd9"},"dark":{"scene":["#0b100e","#1f3329","#b5602f","#f0c89a"],"ocean":["#060a08","#0c1511","#16261f","#27443a"],"land":["#060a08","#1c382b","#3d6a51","#86b69a"],"halo":"#86b69a","star":"#e9e4d6","arc":"#d2622f","arcHi":"#f3ecd9"}};
   function bayer(n){var m=[[0,2],[3,1]];while(m.length<n){var s=m.length,r=[];for(var y=0;y<s*2;y++){r[y]=[];for(var x=0;x<s*2;x++){var b=m[y%s][x%s]*4,q=(y<s?0:2)+(x<s?0:1);r[y][x]=b+[0,2,3,1][q];}}m=r;}return m;}
   function flat(n){var m=bayer(n),t=n*n,o=new Float32Array(t);for(var y=0;y<n;y++)for(var x=0;x<n;x++)o[y*n+x]=(m[y][x]+.5)/t;return o;}
-  var M={4:flat(4),8:flat(8)};
+  var M={8:flat(8)};
   function hex(c){var n=parseInt(c.slice(1),16);return [(n>>16)&255,(n>>8)&255,n&255];}
   function u32(c){var n=parseInt(c.slice(1),16);return (255<<24)|((n&255)<<16)|(n>>8&255)<<8|(n>>16&255);}
-  /* ordered dither (n = 8 house style, 4 = toy mode) of field v (w*h floats) into palette indices */
-  function ordered(v,w,h,N,n,out){var T=M[n||8],mk=(n||8)-1;
-    for(var y=0;y<h;y++)for(var x=0;x<w;x++){var i=y*w+x,t=Math.max(0,Math.min(1,v[i]))*(N-1),b=Math.floor(t);out[i]=Math.min(N-1,b+((t-b)>T[(y&mk)*(mk+1)+(x&mk)]?1:0));}}
-  /* Floyd-Steinberg: only offered as the hero's "toy" mode */
-  function fs(v,w,h,N,out){var e=Float32Array.from(v);
-    for(var y=0;y<h;y++)for(var x=0;x<w;x++){var i=y*w+x,o=Math.max(0,Math.min(1,e[i])),q=Math.round(o*(N-1)),err=o-q/(N-1);out[i]=q;
-      if(x+1<w)e[i+1]+=err*7/16;if(y+1<h){if(x>0)e[i+w-1]+=err*3/16;e[i+w]+=err*5/16;if(x+1<w)e[i+w+1]+=err/16;}}}
+  /* ordered Bayer 8x8 (the only mode): field v (w*h floats in [0,1]) -> palette indices 0..N-1 */
+  function ordered(v,w,h,N,out){var T=M[8];
+    for(var y=0;y<h;y++)for(var x=0;x<w;x++){var i=y*w+x,t=Math.max(0,Math.min(1,v[i]))*(N-1),b=Math.floor(t);out[i]=Math.min(N-1,b+((t-b)>T[(y&7)*8+(x&7)]?1:0));}}
   function dp(){return (window.matchMedia&&matchMedia("(max-width:"+P.dither.mobileMaxWidth+"px)").matches)?P.dither.dpMobile:P.dither.dpDesktop;}
   function theme(t){return P[t==="dark"?"dark":"light"];}
-  return {P:P,M8:M[8],M4:M[4],ordered:ordered,fs:fs,dp:dp,theme:theme,hex:hex,u32:u32,scene:function(t){return theme(t).scene.map(hex);}};
+  return {P:P,M8:M[8],ordered:ordered,dp:dp,theme:theme,hex:hex,u32:u32,scene:function(t){return theme(t).scene.map(hex);}};
 })();
 
 /* codyklr.com concept — no deps, no modules (works from file://) */
@@ -76,14 +72,14 @@ function Scene(canvas,o){
       v+=(.88-v)*Math.min(.5,fa);
       f[y*w+x]=v;}
   };
-  this.draw=function(t,mode,pal,night2){
+  this.draw=function(t,pal,night2){
     self.compute(t,night2);
-    if(mode==="fs")Dither.fs(self.field,w,h,4,self.idx); else Dither.ordered(self.field,w,h,4,mode===4?4:8,self.idx);
+    Dither.ordered(self.field,w,h,4,self.idx);
     paint(canvas.getContext("2d"),self.idx,w,h,pal);};
 }
 
 /* ---------- canvases ---------- */
-var scenes=[],hero=null,mode=8;   /* house style = bayer 8x8; 4 and "fs" are the hero toy modes */
+var scenes=[],hero=null;   /* house style = ordered bayer 8x8 only (src/dither.js) */
 function thumbVariant(c,kind,seed){var w=c.width,h=c.height,v=new Float32Array(w*h),idx=new Uint8Array(w*h);
   return {draw:function(t,m,pal){
     for(var y=0;y<h;y++)for(var x=0;x<w;x++){var val;
@@ -96,7 +92,7 @@ function thumbVariant(c,kind,seed){var w=c.width,h=c.height,v=new Float32Array(w
       else { // contour bands
         var n=fbm(x*.022,y*.034,seed,5)*9;val=n-Math.floor(n);val=val<.2?.1:val*.55+.35;}
       v[y*w+x]=val;}
-    Dither.ordered(v,w,h,4,8,idx);paint(c.getContext("2d"),idx,w,h,pal);}};}
+    Dither.ordered(v,w,h,4,idx);paint(c.getContext("2d"),idx,w,h,pal);}};}
 function altPal(p,which){function mx(a,b,t){return [0,1,2].map(function(i){return Math.round(a[i]+(b[i]-a[i])*t);});}
   return which==="alt"?[p[0],p[1],mx(p[1],p[3],.55),p[3]]:[p[0],mx(p[0],p[3],.25),mx(p[1],p[3],.35),p[3]];}
 function isNight(){return root.getAttribute("data-theme")==="dark";}
@@ -117,7 +113,7 @@ function makeEntry(c){
   if(kind==="thumb"&&c.getAttribute("data-pal"))e.pal=c.getAttribute("data-pal");return e;}
 var tick=0,io=null,queue=[],qBusy=false,firstBuild=true;
 function idle(fn){return (window.requestIdleCallback||function(f){return setTimeout(function(){f({timeRemaining:function(){return 8;}});},40);})(fn,{timeout:700});}
-function drawEntry(e,pal,n){if(e.kind==="hero"||e.kind==="banner")e.s.draw(tick,mode,pal,n);else e.s.draw(0,8,e.pal?altPal(pal,e.pal):pal,n);e.stale=false;}
+function drawEntry(e,pal,n){if(e.kind==="hero"||e.kind==="banner")e.s.draw(tick,pal,n);else e.s.draw(0,e.pal?altPal(pal,e.pal):pal,n);e.stale=false;}
 function pump(){if(qBusy||!queue.length)return;qBusy=true;idle(function(dl){var pal=palette(),n=isNight();
   while(queue.length){var e=queue.shift();if(e.stale&&e.near)drawEntry(e,pal,n);if(dl.timeRemaining&&dl.timeRemaining()<4)break;}
   qBusy=false;pump();});}
@@ -136,7 +132,7 @@ var anim=[];function refAnim(){anim=scenes.filter(function(e){return e.kind==="h
 var last=0,rafId=0,gap=(window.matchMedia&&matchMedia("(pointer:coarse)").matches)||innerWidth<=720?166:100;
 function animVisible(){return anim.some(function(e){return e.near;});}
 function loop(ts){rafId=0;if(reduce||document.hidden||!animVisible())return;
-  if(ts-last>=gap){last=ts;tick+=gap/1000;var pal=palette(),n=isNight();anim.forEach(function(e){if(e.near)e.s.draw(tick,mode,pal,n);});}
+  if(ts-last>=gap){last=ts;tick+=gap/1000;var pal=palette(),n=isNight();anim.forEach(function(e){if(e.near)e.s.draw(tick,pal,n);});}
   rafId=requestAnimationFrame(loop);}
 function kick(){if(!reduce&&!rafId&&!document.hidden&&animVisible())rafId=requestAnimationFrame(loop);}
 document.addEventListener("visibilitychange",kick);
@@ -145,9 +141,7 @@ build();kick();
 /* controls */
 var tb=document.getElementById("theme");
 if(tb)tb.addEventListener("click",function(){dark=!dark;try{localStorage.setItem("theme",dark?"dark":"light");}catch(e){}applyTheme();drawAll();drawMap();});
-document.querySelectorAll("[data-dither]").forEach(function(b){b.addEventListener("click",function(){
-  var v=b.getAttribute("data-dither");mode=v==="fs"?"fs":+v;
-  document.querySelectorAll("[data-dither]").forEach(function(x){x.setAttribute("aria-checked",String(x===b));});drawAll();});});
+
 
 /* ---------- topographic contours: marching squares over fbm -> SVG ---------- */
 var svg=document.getElementById("contours");
