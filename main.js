@@ -81,7 +81,7 @@ function Scene(canvas,o){
 /* ---------- canvases ---------- */
 var scenes=[],hero=null;   /* house style = ordered bayer 8x8 only (src/dither.js) */
 function thumbVariant(c,kind,seed){var w=c.width,h=c.height,v=new Float32Array(w*h),idx=new Uint8Array(w*h);
-  return {draw:function(t,m,pal){
+  return {draw:function(t,pal){
     for(var y=0;y<h;y++)for(var x=0;x<w;x++){var val;
       if(kind==="grid"){ // terrain mosaic: data cells with hairline gutters
         var cx=Math.floor(x/10),cy=Math.floor(y/8),n=fbm(cx*.22,cy*.28,seed,4);
