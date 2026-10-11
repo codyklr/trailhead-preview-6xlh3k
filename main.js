@@ -345,7 +345,7 @@ function openReader(a){
   var d=li.dataset,cv=d.pal?' data-pal="'+esc(d.pal)+'"':"";
   var leaves="";for(var k=1;k<=5;k++)leaves+='<div class="rd-leaf" style="--k:'+k+'"><i class="fr paper"></i><i class="bk paper">'+(k===5?'<b class="ruled">notes</b>':'')+'</i></div>';
   rbook.innerHTML='<span class="rd-shadow" aria-hidden="true"></span>'+
-    '<div class="rd-page paper"><p class="eyebrow">trip journal</p>'+
+    '<div class="rd-page paper">'+
     '<h2 id="rd-title">'+esc(d.title)+'</h2><span class="dt">'+esc(d.date)+'</span>'+
     '<div class="stats2"'+(d.stats?'':' hidden')+'><span>'+esc(d.stats||"")+'</span></div>'+
     '<p>'+esc(d.blurb)+'</p><a class="read" href="'+esc(d.href)+'">Read entry →</a></div>'+leaves+
