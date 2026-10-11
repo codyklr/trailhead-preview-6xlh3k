@@ -7,7 +7,6 @@
 :root{
   --bg:#f1ebdd; --bg2:#e6dfcd; --ink:#16201b; --muted:#4d564f; --pine:#2c4a3b; --granite:#7b8179;
   --accent:#a8421a; --line:rgba(22,32,27,.22);
-  --c0:#16201b; --c1:#2c4a3b; --c2:#c4572a; --c3:#f1ebdd;
   --display:"Instrument Serif","Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
   --body:"Atkinson Hyperlegible Next","Atkinson Hyperlegible","Trebuchet MS","Segoe UI",system-ui,sans-serif;
   --mono:"Geist Mono","SF Mono",ui-monospace,"SF Mono",Menlo,Consolas,"DejaVu Sans Mono",monospace;
@@ -17,8 +16,10 @@
 :root[data-theme="dark"]{
   --bg:#0e1411; --bg2:#151e19; --ink:#e9e4d6; --muted:#a3ab9f; --pine:#7fae92; --granite:#6c746c;
   --accent:#e8935a; --line:rgba(233,228,214,.2);
-  --c0:#0b100e; --c1:#1f3329; --c2:#b5602f; --c3:#f0c89a;
 }
+:root{--c0:#16201b;--c1:#2c4a3b;--c2:#c4572a;--c3:#f1ebdd;--dp:3px}
+:root[data-theme="dark"]{--c0:#0b100e;--c1:#1f3329;--c2:#b5602f;--c3:#f0c89a;}
+@media(max-width:720px){:root{--dp:2px}}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.7 var(--body);font-optical-sizing:auto;-webkit-font-smoothing:antialiased;transition:background .3s,color .3s}
@@ -93,7 +94,7 @@ span.cur{display:inline-block;width:.6em;height:1.05em;background:var(--ink);ver
 .f{position:absolute;display:block}
 .f-front{position:relative;transform:translateZ(7px);background:var(--bg);border:1px solid var(--ink)}
 .f-front::after{content:"";position:absolute;inset:0;pointer-events:none;
-  background:url(assets/dither-h.png) left top/24px 4px repeat-y,url(assets/dither-v.png) left bottom/4px 12px repeat-x;image-rendering:pixelated;opacity:.6;
+  background:url(assets/dither-h.png) left top/calc(8*var(--dp)) calc(8*var(--dp)) repeat-y,url(assets/dither-v.png) left bottom/calc(8*var(--dp)) calc(8*var(--dp)) repeat-x;image-rendering:pixelated;opacity:.6;
 }
 .f-front::before{content:"";position:absolute;left:0;top:0;bottom:0;width:7px;background:var(--ink);opacity:.9;z-index:1}
 .f-back{inset:0;transform:translateZ(-7px) rotateY(180deg);background:var(--ink)}
@@ -145,7 +146,7 @@ span.cur{display:inline-block;width:.6em;height:1.05em;background:var(--ink);ver
   -webkit-mask-image:linear-gradient(135deg,transparent 5%,#000 50%,transparent 100%);mask-image:linear-gradient(135deg,transparent 5%,#000 50%,transparent 100%)}
 .rd-book.up .rd-shadow{opacity:.42;transform:translateZ(-30px) translate(10px,16px) scale(1.05)}
 .rd-page,.rd-leaf,.rd-cover{position:absolute;inset:0;transform-origin:left center}
-.paper{background:var(--bg) url(assets/dither-paper.png);border:1px solid var(--ink)}
+.paper{background:var(--bg) url(assets/dither-paper.png) 0 0/calc(16*var(--dp)) calc(16*var(--dp));border:1px solid var(--ink)}
 .rd-page{padding:1.6rem 1.4rem 1.4rem 1.9rem;display:flex;flex-direction:column;pointer-events:auto;overflow:hidden}
 .rd-page::before{content:"";position:absolute;left:0;top:0;bottom:0;width:7px;background:var(--ink)}
 .rd-page .eyebrow{margin-bottom:.9rem}.rd-page .eyebrow::after{display:none}
@@ -157,7 +158,7 @@ span.cur{display:inline-block;width:.6em;height:1.05em;background:var(--ink);ver
 .rd-leaf{transform-style:preserve-3d;transform:translateZ(calc((6 - var(--k))*.6px)) rotateY(0deg);transition:transform .5s cubic-bezier(.45,.05,.3,1);transition-delay:calc((5 - var(--k))*.04s)}
 .rd-leaf>i{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}
 .rd-leaf>i.bk{transform:rotateY(180deg)}
-.rd-leaf>i::after{content:"";position:absolute;inset:0;background:url(assets/dither-h.png) right top/24px 4px repeat-y;transform:scaleX(-1);opacity:.45}
+.rd-leaf>i::after{content:"";position:absolute;inset:0;background:url(assets/dither-h.png) right top/calc(8*var(--dp)) calc(8*var(--dp)) repeat-y;transform:scaleX(-1);opacity:.45}
 .rd-book.open .rd-leaf{transform:translateZ(calc((6 - var(--k))*.6px)) rotateY(calc(-176deg + var(--k)*1.2deg));transition-delay:calc(.28s + var(--k)*.075s)}
 .rd-cover{transform-style:preserve-3d;transform:translateZ(5px) rotateY(0deg);transition:transform .7s cubic-bezier(.5,0,.2,1)}
 .rd-book.open .rd-cover{transform:translateZ(5px) rotateY(-180deg);transition-duration:.85s}
@@ -166,7 +167,7 @@ span.cur{display:inline-block;width:.6em;height:1.05em;background:var(--ink);ver
 .rd-cover>i.fr::before{content:"";position:absolute;left:0;top:0;bottom:0;width:8px;background:var(--ink);z-index:1}
 .rd-cover>i.fr canvas,.rd-cover>i.fr img.pix{margin-left:8px;border-bottom:1px solid var(--ink)}
 .rd-cover>i.fr .cap{padding-left:1.4rem}
-.rd-cover>i.bk{transform:rotateY(180deg);background:var(--bg2) url(assets/dither-paper.png);border:1px solid var(--ink);font:11px/1.6 var(--pixel);text-transform:uppercase;padding:1.5rem;color:var(--muted);letter-spacing:.06em}
+.rd-cover>i.bk{transform:rotateY(180deg);background:var(--bg2) url(assets/dither-paper.png) 0 0/calc(16*var(--dp)) calc(16*var(--dp));border:1px solid var(--ink);font:11px/1.6 var(--pixel);text-transform:uppercase;padding:1.5rem;color:var(--muted);letter-spacing:.06em}
 .rd-close{position:absolute;top:1rem;right:1rem;pointer-events:auto;background:var(--bg)}
 @media(max-width:720px){.rd-book{--shift:0px;--W:min(340px,88vw);--H:calc(var(--W)*1.5)}.rd-close{top:.6rem;right:.6rem}
   .rd-page{padding:1.6rem 1.3rem 1.4rem 1.7rem}.rd-page p{font-size:16.5px}.rd-page .stats2{flex-wrap:wrap;gap:.3rem 1rem;font-size:12.5px}
@@ -396,3 +397,12 @@ section[id]{scroll-margin-top:calc(var(--hdr,56px) + 8px)}
 .gframe{contain:layout paint}
 .gl li.is-cur{background:color-mix(in srgb,var(--accent) 12%,transparent)}
 .gl li{box-sizing:border-box;width:100%}
+
+/* house dither scale: photo dithers are shown at cols * --dp so every texel is one dither pixel (grids: see tools/build_photos.py) */
+:root{--gw:120;--cv:80}
+@media(max-width:720px){:root{--gw:160;--cv:124}}
+.gallery{grid-template-columns:repeat(auto-fill,minmax(calc(var(--gw)*var(--dp) + 2px),1fr))!important;gap:1.6rem 1.4rem}
+.ph-btn{box-sizing:content-box;width:calc(var(--gw)*var(--dp));max-width:100%}
+.ph-btn img.d{width:100%}
+@media(max-width:720px){.gallery{justify-items:center}.gallery figcaption{align-self:start}figure.photo{max-width:100%}}
+.f-front picture{display:block}
