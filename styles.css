@@ -31,7 +31,7 @@ a:hover{color:var(--accent)}
 #contours path{fill:none;stroke:currentColor;stroke-width:1;vector-effect:non-scaling-stroke}
 .wrap{max-width:var(--max);margin:0 auto;padding:0 1.25rem}
 .mono{font-family:var(--mono)}
-header.bar{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+header.bar{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 96%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
 header.bar .wrap{display:flex;align-items:center;gap:.5rem 1rem;min-height:48px;flex-wrap:wrap;padding-top:.3rem;padding-bottom:.3rem;font:13px var(--mono)}
 .brand{font-weight:700;text-decoration:none;letter-spacing:.02em}
 .brand i{color:var(--accent);font-style:normal}
