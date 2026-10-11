@@ -240,7 +240,7 @@ function N0(){return G.N*G.S;}
 function gShow(id){G.active=id;if(!id){sH(gcard,true);G.dirty=1;gKick();return;}var p=gFind(id);
   gcard.innerHTML='<span class="nm">'+(id==="home"?p.label:gLabel(p)+" · "+gDate(p.date))+'</span>'+(id==="home"||!p.href?"":'<a href="'+p.href+'">Read entry →</a>');sH(gcard,false);G.dirty=1;gKick();}
 function gSelect(id,pin){G.pinned=pin;gShow(id);var p=gFind(id);gFly(p.lon,p.lat,Math.max(G.zoom,id==="home"?1.6:5));
-  document.querySelectorAll("#glist li").forEach(function(li){li.classList.toggle("cur",li.getAttribute("data-id")===id);});}
+  document.querySelectorAll("#glist li").forEach(function(li){li.classList.toggle("is-cur",li.getAttribute("data-id")===id);});}
 /* camera */
 function gFly(lon,lat,zoom){zoom=Math.max(1,Math.min(24,zoom));if(reduce){G.lon=lon;G.lat=Math.max(-70,Math.min(70,lat));G.zoom=zoom;G.vLon=0;G.dirty=1;gKick();return;}
   var dl=((lon-G.lon+540)%360)-180;G.fly={t0:performance.now(),dur:900+Math.min(600,Math.abs(dl)*6),l0:G.lon,dl:dl,a0:G.lat,da:Math.max(-70,Math.min(70,lat))-G.lat,z0:G.zoom,dz:zoom-G.zoom};G.vLon=0;gKick();}
