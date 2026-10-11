@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta name="robots" content="noindex,nofollow"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><link rel="preload" href="assets/fonts/instrument-serif-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="assets/fonts/atkinson-hyperlegible-next-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="assets/fonts/geist-mono-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="assets/fonts/DepartureMono-Regular.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="styles.css?v=20261011d"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 fill=%27%2316201b%27/%3E%3Cpath d=%27M3 26 11 10l5 8 4-6 9 14z%27 fill=%27%23c4572a%27/%3E%3C/svg%3E">
+<title>Cody Keller</title>
+<meta name="description" content="Cody Keller: portfolio and trip journals.">
+<script>try{var t=(location.search.match(/theme=(dark|light)/)||[])[1]||localStorage.getItem("theme");if(t==="dark"||(!t&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<svg id="contours" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true"></svg>
+<header class="bar"><div class="wrap">
+  <a class="brand" href="#top">cody<i>@</i>trailhead:~</a>
+  <nav aria-label="Primary"><a href="#about">about</a><a href="#work">work</a><a href="#journal">trip journals</a><a href="#map">map</a></nav>
+  <button class="btn" id="theme" aria-pressed="false">☀ day hike</button>
+</div></header>
+<main id="main">
+<section class="hero wrap" id="top">
+  <div class="frame">
+    <div class="chrome"><span class="dots" aria-hidden="true"><b></b><b></b><b></b></span><span>summit.render — live, procedural</span>
+      <span class="sp" role="radiogroup" aria-label="Dither algorithm"><span class="lbl">dither:</span>
+        <button class="btn" role="radio" aria-checked="true" data-dither="4">bayer 4×4</button>
+        <button class="btn" role="radio" aria-checked="false" data-dither="8">bayer 8×8</button>
+        <button class="btn" role="radio" aria-checked="false" data-dither="fs"><span class="long">floyd–steinberg</span><span class="short">floyd</span></button></span></div>
+    <canvas class="pix" id="hero-canvas" data-scene="hero" data-seed="3" width="400" height="190" role="img" aria-label="Dithered illustration of mountain ridges with fog and a rising sun"></canvas>
+  </div>
+  <div class="hero-text">
+    <p class="eyebrow">// portfolio + trip journals</p>
+    <h1>Cody Keller</h1>
+    <p class="tag">One-line tagline goes here.<span class="ph">PLACEHOLDER</span></p>
+    <p class="status" role="status"><span class="k">currently:</span> <span id="status-text">somewhere above treeline [placeholder]</span><span class="cur" aria-hidden="true"></span></p>
+  </div>
+</section>
+
+<section class="wrap" id="about">
+  <p class="eyebrow">01 / who I am</p><h2>About</h2>
+  <div class="about">
+    <div>
+      <p>Placeholder paragraph about who Cody is, what he cares about, and how he works. Short, plain, a little wry.<span class="ph">PLACEHOLDER</span></p>
+      <p>Placeholder paragraph about the outdoors: slow miles, early starts, and why the trail is where the good ideas show up.<span class="ph">PLACEHOLDER</span></p>
+    </div>
+    <ul class="facts" aria-label="Quick facts">
+      <li><span>base</span><span>[placeholder]</span></li><li><span>works on</span><span>[placeholder]</span></li>
+      <li><span>favorite trail</span><span>[placeholder]</span></li><li><span>pack weight</span><span>[placeholder]</span></li>
+    </ul>
+  </div>
+</section>
+
+<section class="wrap" id="work">
+  <p class="eyebrow">02 / things I've built</p><h2>Work</h2>
+  <div class="grid">
+    <article class="card"><canvas class="pix" data-scene="thumb" data-seed="11" data-variant="grid" width="200" height="110" aria-hidden="true"></canvas>
+      <div class="body"><h3>Workday Jobs Scraper</h3>
+      <p>Apify actor that scrapes any public Workday careers site, past the 2,000-result cap.</p>
+      <div class="meta"><span>Apify</span><span>account: toklab</span><span>$1.50 / 1,000 jobs</span></div></div></article>
+    <article class="card"><canvas class="pix" data-scene="thumb" data-seed="24" data-variant="rings" width="200" height="110" aria-hidden="true"></canvas>
+      <div class="body"><h3>AI Visibility Tracker</h3>
+      <p>Apify actor that tracks how often brands appear in ChatGPT, Perplexity, Gemini and Claude answers.</p>
+      <div class="meta"><span>Apify</span><span>account: toklab</span></div></div></article>
+    <article class="card is-ph"><canvas class="pix" data-scene="thumb" data-seed="5" data-variant="contour" data-pal="alt" width="200" height="110" aria-hidden="true"></canvas>
+      <div class="body"><h3>Project name<span class="ph">PLACEHOLDER</span></h3><p>Placeholder description of another project.</p><div class="meta"><span>[stack]</span><span>[year]</span></div></div></article>
+    <article class="card is-ph"><canvas class="pix" data-scene="thumb" data-seed="8" data-variant="ridge" data-pal="alt2" width="200" height="110" aria-hidden="true"></canvas>
+      <div class="body"><h3>Project name<span class="ph">PLACEHOLDER</span></h3><p>Placeholder description of another project.</p><div class="meta"><span>[stack]</span><span>[year]</span></div></div></article>
+  </div>
+</section>
+
+<section class="wrap" id="journal">
+  <p class="eyebrow">03 / trip journals</p><h2>Trip Journals</h2>
+  <div class="filters" role="group" aria-label="Filter entries by visibility">filter:
+    <button class="btn" data-filter="all" aria-pressed="true">all</button>
+    <button class="btn" data-filter="public" aria-pressed="false">public</button>
+    <button class="btn" data-filter="friends" aria-pressed="false">friends</button></div>
+  <ul class="shelf" aria-label="Trip journals, shown as a scatter of notebooks">
+    <li data-vis="public" style="--r:-3deg;--dy:0px" data-title="Acadia, October 2026" data-date="Oct 3–10, 2026" data-stats="-- mi · -- ft" data-blurb="Fall color on the carriage roads and pond trails. A bike, a few short hikes, and a lot of stopping to look." data-href="acadia-2026-10.html" data-photo="assets/photos/acadia-cover.png">
+      <a class="book" href="acadia-2026-10.html"><span class="shadow" aria-hidden="true"></span>
+        <span class="f f-back" aria-hidden="true"></span><span class="f f-left" aria-hidden="true"></span><span class="f f-right" aria-hidden="true"></span><span class="f f-top" aria-hidden="true"></span><span class="f f-bottom" aria-hidden="true"></span>
+        <span class="f f-front"><img class="pix" src="assets/photos/acadia-cover.png" width="168" height="175" alt="" loading="lazy" aria-hidden="true">
+          <span class="cap"><span class="dt">Oct 3–10, 2026</span><span class="ti">Acadia, October 2026</span><span class="st"><span>-- mi · -- ft</span><span class="badge public">public</span></span></span></span>
+      </a></li>
+    <li data-vis="public" style="--r:-1.4deg;--dy:-8px" data-title="NYC, October 2026" data-date="Oct 2026" data-stats="-- mi · -- ft" data-blurb="Out to the harbor for Lady Liberty, then a long afternoon at the museum." data-href="acadia-2026-10.html" data-photo="assets/photos/liberty-cover.png">
+      <a class="book" href="acadia-2026-10.html"><span class="shadow" aria-hidden="true"></span>
+        <span class="f f-back" aria-hidden="true"></span><span class="f f-left" aria-hidden="true"></span><span class="f f-right" aria-hidden="true"></span><span class="f f-top" aria-hidden="true"></span><span class="f f-bottom" aria-hidden="true"></span>
+        <span class="f f-front"><img class="pix" src="assets/photos/liberty-cover.png" width="168" height="175" alt="" loading="lazy" aria-hidden="true">
+          <span class="cap"><span class="dt">Oct 2026</span><span class="ti">NYC, October 2026</span><span class="st"><span>-- mi · -- ft</span><span class="badge public">public</span></span></span></span>
+      </a></li>
+    <li data-vis="friends" style="--r:3.6deg;--dy:26px" data-title="The Met, armor hall" data-date="Oct 2026" data-stats="-- mi · -- ft" data-blurb="A suit of armor behind glass, big enough to make you rethink the Middle Ages. A short stop on the NYC leg." data-href="acadia-2026-10.html" data-photo="assets/photos/armor-cover.png">
+      <a class="book" href="acadia-2026-10.html"><span class="shadow" aria-hidden="true"></span>
+        <span class="f f-back" aria-hidden="true"></span><span class="f f-left" aria-hidden="true"></span><span class="f f-right" aria-hidden="true"></span><span class="f f-top" aria-hidden="true"></span><span class="f f-bottom" aria-hidden="true"></span>
+        <span class="f f-front"><img class="pix" src="assets/photos/armor-cover.png" width="168" height="175" alt="" loading="lazy" aria-hidden="true">
+          <span class="cap"><span class="dt">Oct 2026</span><span class="ti">The Met, armor hall</span><span class="st"><span>-- mi · -- ft</span><span class="badge friends">friends</span></span></span></span>
+      </a></li>
+  </ul>
+  <p class="shelf-hint"><span class="hint-desk">Hover to tilt a notebook; click or press Enter to open it.</span><span class="hint-mob">Swipe the shelf, tap a notebook to open it.</span></p>
+</section>
+
+<section class="wrap" id="map">
+  <p class="eyebrow">04 / where I've been</p><h2>Map</h2>
+  <div class="globe-ui">
+    <div class="gcol">
+      <div class="gframe" id="gframe">
+        <div class="gwrap" id="gwrap" tabindex="0" role="group" aria-label="Interactive globe of places I have visited. Drag to rotate, arrow keys to turn, or use the list.">
+          <canvas class="pix" id="gcanvas" aria-hidden="true"></canvas>
+          <div class="gpins" id="gpins"></div>
+          <div class="gcard" id="gcard" role="status" hidden></div>
+        </div>
+      </div>
+      <div class="gctl" role="group" aria-label="Globe controls">
+        <button class="btn" type="button" id="g-home">Home</button>
+        <button class="btn" type="button" id="g-ne">Northeast</button>
+        <button class="btn" type="button" id="g-in" aria-label="Zoom in">+</button>
+        <button class="btn" type="button" id="g-out" aria-label="Zoom out">&minus;</button>
+        <button class="btn" type="button" id="g-spin" aria-pressed="false">Pause spin</button>
+      </div>
+    </div>
+    <div class="gside">
+      <h3 class="gh">Timeline</h3>
+      <div class="gtime" id="gtime" role="group" aria-label="Timeline of visits by month"></div>
+      <h3 class="gh">Places</h3>
+      <ul class="gl" id="glist"></ul>
+    </div>
+  </div>
+  <p class="note" id="mapnote">Drag to turn the globe. Home base: Houston, TX, shown at city level only.</p>
+</section>
+</main>
+<footer><div class="wrap">
+  <a href="#">GitHub <span class="ph">PLACEHOLDER</span></a><a href="#">X <span class="ph">PLACEHOLDER</span></a><a href="#">email <span class="ph">PLACEHOLDER</span></a>
+  <span class="cairn" aria-hidden="true">▲ ▲▲ ▲▲▲ cairn</span></div></footer>
+<div class="reader" id="reader" hidden>
+  <div class="rd-scrim" data-close></div>
+  <div class="rd-dialog" role="dialog" aria-modal="true" aria-labelledby="rd-title" tabindex="-1">
+    <div class="rd-scene"><div class="rd-fly" id="rd-fly"><div class="rd-book" id="rd-book"></div></div></div>
+    <button class="btn rd-close" type="button" data-close>close ✕ <span class="sr">(Esc)</span></button>
+  </div>
+</div>
+<script src="main.js?v=20261011d"></script>
+</body></html>
