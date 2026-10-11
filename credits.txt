@@ -1,0 +1,9 @@
+Sound credits
+
+Recorded sounds (page turns, book open/close) are by Joseph Sardin, BigSoundBank (https://bigsoundbank.com),
+released under CC0 1.0 Universal (public domain dedication). Sound IDs used: 362, 363, 1411, 1412, 2211, 2212.
+Clips are trimmed, filtered and re-encoded. No attribution is required; credited as a courtesy.
+
+All other sounds are synthesised in the browser.
+
+Fonts: see README (SIL OFL / MIT).
