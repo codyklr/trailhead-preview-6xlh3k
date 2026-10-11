@@ -1,10 +1,47 @@
 {
-  "_help": "Edit this file to change the globe. City level only: [lat, lon] of a town centre, never a street address. date is YYYY-MM. Add a place by appending to 'places'; it gets a pin, a list row and a timeline mark automatically.",
-  "home": { "name": "Houston", "region": "TX", "label": "Home · Houston", "lat": 29.76, "lon": -95.37 },
-  "hires": { "bbox": [-79, 38, -64, 47], "ppd": 48 },
-  "places": [
-    { "id": "nyc",    "name": "New York City", "region": "NY", "lat": 40.71, "lon": -74.01, "date": "2026-10", "href": "acadia-2026-10.html" },
-    { "id": "boston", "name": "Boston",        "region": "MA", "lat": 42.36, "lon": -71.06, "date": "2026-10", "href": "acadia-2026-10.html" },
-    { "id": "acadia", "name": "Acadia",        "region": "ME", "label": "Acadia (Bar Harbor), ME", "lat": 44.39, "lon": -68.20, "date": "2026-10", "href": "acadia-2026-10.html" }
-  ]
+ "home": {
+  "name": "Houston",
+  "region": "TX",
+  "label": "Home · Houston",
+  "lat": 29.76,
+  "lon": -95.37
+ },
+ "hires": {
+  "bbox": [
+   -79,
+   38,
+   -64,
+   47
+  ],
+  "ppd": 48
+ },
+ "places": [
+  {
+   "id": "acadia-me",
+   "name": "Acadia",
+   "region": "ME",
+   "label": "Acadia (Bar Harbor), ME",
+   "lat": 44.39,
+   "lon": -68.2,
+   "date": "2026-10",
+   "href": "trips/acadia-2026-10/"
+  },
+  {
+   "id": "new-york-city-ny",
+   "name": "New York City",
+   "region": "NY",
+   "lat": 40.71,
+   "lon": -74.01,
+   "date": "2026-10",
+   "href": "trips/nyc-2026-10/"
+  },
+  {
+   "id": "boston",
+   "name": "Boston",
+   "region": "MA",
+   "lat": 42.36,
+   "lon": -71.06,
+   "date": "2026-10"
+  }
+ ]
 }

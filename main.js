@@ -12,6 +12,7 @@ function applyTheme(){ root.setAttribute("data-theme", dark?"dark":"light");
   var b=document.getElementById("theme"); if(b){b.setAttribute("aria-pressed",String(dark)); b.textContent=dark?"☾ night hike":"☀ day hike";}}
 applyTheme();
 
+var hdrEl=document.querySelector("header.bar");function setHdr(){if(hdrEl)root.style.setProperty("--hdr",hdrEl.offsetHeight+"px");}setHdr();window.addEventListener("resize",setHdr);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(setHdr);
 /* ---------- noise ---------- */
 function hash(x,y,s){var h=(Math.imul(x,374761393)+Math.imul(y,668265263)+Math.imul(s,982451653))|0;
   h=Math.imul(h^(h>>>13),1274126177);h^=h>>>16;return (h>>>0)/4294967295;}
@@ -104,24 +105,32 @@ function makeEntry(c){
   else {o.layers=v==="ridge"?5:2+(o.seed%3);o.sunX=.2+((o.seed*37)%60)/100;o.sunY=.35+((o.seed*13)%25)/100;o.sunR=.1;}
   var e={c:c,s:new Scene(c,o),kind:kind};if(kind==="hero")hero=e;
   if(kind==="thumb"&&c.getAttribute("data-pal"))e.pal=c.getAttribute("data-pal");return e;}
-function build(){scenes=[];
-  document.querySelectorAll("canvas[data-scene]").forEach(function(c){fit(c);scenes.push(makeEntry(c));});}
-var tick=0;build();
-function drawAll(){var pal=palette(),n=isNight();
-  scenes.forEach(function(e){ if(e.kind==="hero"||e.kind==="banner")e.s.draw(tick,mode,pal,n); else e.s.draw(0,"fs",e.pal?altPal(pal,e.pal):pal,n);});}
-drawAll();
-
-/* animate only hero/banner, ~10fps, only while visible */
-var visible=true,anim=[];
-function refAnim(){anim=scenes.filter(function(e){return e.kind==="hero"||e.kind==="banner";});}refAnim();
-if(!reduce){
-  if(anim.length&&"IntersectionObserver" in window){window._noop=0;
-    new IntersectionObserver(function(es){visible=es.some(function(e){return e.isIntersecting;});},{}).observe(anim[0].c);}
-  var last=0;
-  (function loop(ts){requestAnimationFrame(loop);
-    if(!visible||document.hidden||ts-last<100)return;last=ts;tick+=.1;
-    var pal=palette(),n=isNight();anim.forEach(function(e){e.s.draw(tick,mode,pal,n);});})(0);
-}
+var tick=0,io=null,queue=[],qBusy=false,firstBuild=true;
+function idle(fn){return (window.requestIdleCallback||function(f){return setTimeout(function(){f({timeRemaining:function(){return 8;}});},40);})(fn,{timeout:700});}
+function drawEntry(e,pal,n){if(e.kind==="hero"||e.kind==="banner")e.s.draw(tick,mode,pal,n);else e.s.draw(0,"fs",e.pal?altPal(pal,e.pal):pal,n);e.stale=false;}
+function pump(){if(qBusy||!queue.length)return;qBusy=true;idle(function(dl){var pal=palette(),n=isNight();
+  while(queue.length){var e=queue.shift();if(e.stale&&e.near)drawEntry(e,pal,n);if(dl.timeRemaining&&dl.timeRemaining()<4)break;}
+  qBusy=false;pump();});}
+function want(e){if(e.stale&&e.near&&queue.indexOf(e)<0){queue.push(e);pump();}}
+/* canvases are built lazily: hero first (sync), the rest when they come near the viewport, one per idle slice */
+function build(sync){scenes=[];queue=[];if(io){io.disconnect();io=null;}
+  document.querySelectorAll("canvas[data-scene]").forEach(function(c){fit(c);var e=makeEntry(c);e.stale=true;e.near=false;c._e=e;scenes.push(e);});
+  refAnim();var pal=palette(),n=isNight();
+  scenes.forEach(function(e){if(sync||(firstBuild&&e===hero)){e.near=true;drawEntry(e,pal,n);}});firstBuild=false;
+  if("IntersectionObserver" in window&&!sync){io=new IntersectionObserver(function(es){es.forEach(function(x){var e=x.target._e;if(!e)return;e.near=x.isIntersecting;if(e.near)want(e);});kick();},{rootMargin:"300px 0px"});
+    scenes.forEach(function(e){io.observe(e.c);});}
+  else scenes.forEach(function(e){e.near=true;if(e.stale)drawEntry(e,pal,n);});}
+function drawAll(){var pal=palette(),n=isNight();scenes.forEach(function(e){e.stale=true;if(e===hero||e.kind==="banner"){if(e.near)drawEntry(e,pal,n);}else want(e);});}
+var anim=[];function refAnim(){anim=scenes.filter(function(e){return e.kind==="hero"||e.kind==="banner";});}
+/* animate only hero/banner while on screen; ~10fps (6fps on phones); the loop is not scheduled at all when idle */
+var last=0,rafId=0,gap=(window.matchMedia&&matchMedia("(pointer:coarse)").matches)||innerWidth<=720?166:100;
+function animVisible(){return anim.some(function(e){return e.near;});}
+function loop(ts){rafId=0;if(reduce||document.hidden||!animVisible())return;
+  if(ts-last>=gap){last=ts;tick+=gap/1000;var pal=palette(),n=isNight();anim.forEach(function(e){if(e.near)e.s.draw(tick,mode,pal,n);});}
+  rafId=requestAnimationFrame(loop);}
+function kick(){if(!reduce&&!rafId&&!document.hidden&&animVisible())rafId=requestAnimationFrame(loop);}
+document.addEventListener("visibilitychange",kick);
+build();kick();
 
 /* controls */
 var tb=document.getElementById("theme");
@@ -132,7 +141,7 @@ document.querySelectorAll("[data-dither]").forEach(function(b){b.addEventListene
 
 /* ---------- topographic contours: marching squares over fbm -> SVG ---------- */
 var svg=document.getElementById("contours");
-if(svg){
+if(svg)idle(function(){
   var GW=72,GH=48,g=[],W=1200,H=800,cw=W/(GW-1),ch=H/(GH-1);
   for(var j=0;j<GH;j++){g[j]=[];for(var i=0;i<GW;i++)g[j][i]=fbm(i*.055,j*.055,7,5);}
   var segs=[];
@@ -149,7 +158,7 @@ if(svg){
     var path=document.createElementNS("http://www.w3.org/2000/svg","path");path.setAttribute("d",d);
     if(Math.round((lv-.30)/.035)%4===0)path.setAttribute("style","stroke-width:1.6");svg.appendChild(path);
   }
-}
+});
 
 /* ---------- dithered globe (software renderer, orthographic, Bayer-dithered) ---------- */
 var G={d:null,land:null,blur:null,hi:null,lon:-62,lat:22,zoom:1,vLon:0,fly:null,dirty:1,raf:null,last:0,vis:true,paused:false,hover:false,N:0,S:1,R:0,theme:"",active:null,selMonth:null,drag:null,justDrag:0,cols:null};
@@ -222,7 +231,7 @@ function gPins(R,cx,cy,lam0,sp,cp){var S=G.S,list=[{id:"home",p:G.d.home}].conca
   if(G.active){var o2=list.filter(function(o){return o.id===G.active;})[0];if(o2&&o2.vis&&!gBtn[G.active].hidden){gcard.hidden=false;var w=gcard.offsetWidth,W=N0(),x=Math.max(4,Math.min(W-w-4,o2.x-w/2)),y=o2.y-gcard.offsetHeight-16;if(y<4)y=o2.y+16;gcard.style.transform="translate("+x.toFixed(0)+"px,"+y.toFixed(0)+"px)";}else if(o2&&o2.vis&&G.zoom>=1.5){gcard.hidden=true;}else gcard.hidden=true;}}
 function N0(){return G.N*G.S;}
 function gShow(id){G.active=id;if(!id){gcard.hidden=true;G.dirty=1;gKick();return;}var p=gFind(id);
-  gcard.innerHTML='<span class="nm">'+(id==="home"?p.label:gLabel(p)+" · "+gDate(p.date))+'</span>'+(id==="home"?"":'<a href="'+p.href+'">Read entry →</a>');gcard.hidden=false;G.dirty=1;gKick();}
+  gcard.innerHTML='<span class="nm">'+(id==="home"?p.label:gLabel(p)+" · "+gDate(p.date))+'</span>'+(id==="home"||!p.href?"":'<a href="'+p.href+'">Read entry →</a>');gcard.hidden=false;G.dirty=1;gKick();}
 function gSelect(id,pin){G.pinned=pin;gShow(id);var p=gFind(id);gFly(p.lon,p.lat,Math.max(G.zoom,id==="home"?1.6:5));
   document.querySelectorAll("#glist li").forEach(function(li){li.classList.toggle("cur",li.getAttribute("data-id")===id);});}
 /* camera */
@@ -266,7 +275,7 @@ function gUI(){var d=G.d,ix=function(s){var p=s.split("-");return +p[0]*12+ +p[1
   var ul=document.getElementById("glist");ul.innerHTML="";
   var rows=[{id:"home",p:d.home,home:1}].concat(d.places.slice().sort(function(a,b){return a.date<b.date?1:-1;}).map(function(p){return {id:p.id,p:p};}));
   rows.forEach(function(r){var li=document.createElement("li");li.setAttribute("data-id",r.id);if(r.home)li.className="home";
-    li.innerHTML='<button type="button">'+(r.home?"Houston, TX":gLabel(r.p))+'</button><span class="dt">'+(r.home?"home base":gDate(r.p.date))+"</span>"+(r.home?"":'<a href="'+r.p.href+'" aria-label="Read entry: '+gLabel(r.p)+'">entry →</a>');
+    li.innerHTML='<button type="button">'+(r.home?"Houston, TX":gLabel(r.p))+'</button><span class="dt">'+(r.home?"home base":gDate(r.p.date))+"</span>"+(r.home||!r.p.href?"":'<a href="'+r.p.href+'" aria-label="Read entry: '+gLabel(r.p)+'">entry →</a>');
     li.querySelector("button").addEventListener("click",function(){gSelect(r.id,true);});ul.appendChild(li);});
   document.getElementById("g-home").addEventListener("click",function(){G.selMonth=null;tl.querySelectorAll(".mc").forEach(function(x){x.classList.remove("sel");x.setAttribute("aria-pressed","false");});gShow(null);G.pinned=false;gFly(d.home.lon,d.home.lat,1.4);});
   document.getElementById("g-ne").addEventListener("click",function(){gShow(null);G.pinned=false;gFit(d.places);});
@@ -278,20 +287,15 @@ if(gcv&&gwrap){
     if("IntersectionObserver" in window)new IntersectionObserver(function(es){G.vis=es[0].isIntersecting;if(G.vis){G.last=0;G.dirty=1;gKick();}}).observe(gwrap);
     if("ResizeObserver" in window)new ResizeObserver(function(){G.dirty=1;gKick();}).observe(gframe);
     document.addEventListener("visibilitychange",function(){if(!document.hidden){G.dirty=1;gKick();}});}
+  var gstarted=false;function gStart(){if(gstarted)return;gstarted=true;
   fetch("trips.json").then(function(r){return r.json();}).then(function(d){G.d=d;gGo();}).catch(function(){var n=document.getElementById("mapnote");if(n)n.textContent="Map unavailable right now.";});
-  gLoadMask("assets/globe/land.png",function(m){G.land=m;gGo();});gLoadMask("assets/globe/blur.png",function(m){G.blur=m;gGo();});gLoadMask("assets/globe/hires.png",function(m){G.hi=m;gGo();});
+  gLoadMask("assets/globe/land.png",function(m){G.land=m;gGo();});gLoadMask("assets/globe/blur.png",function(m){G.blur=m;gGo();});gLoadMask("assets/globe/hires.png",function(m){G.hi=m;gGo();});}
+  if("IntersectionObserver" in window){var gio=new IntersectionObserver(function(es){if(es[0].isIntersecting){gio.disconnect();gStart();}},{rootMargin:"600px 0px"});gio.observe(gframe);}else gStart();
 }
 function drawMap(){G.dirty=1;if(G.cols)G.cols=null;gKick();}
 
-var rz;window.addEventListener("resize",function(){clearTimeout(rz);rz=setTimeout(function(){build();refAnim();drawAll();drawMap();},150);});
-/* ---------- journal filter ---------- */
+var rz;window.addEventListener("resize",function(){clearTimeout(rz);rz=setTimeout(function(){build();kick();drawMap();},150);});
 var shelf=document.querySelector(".shelf");
-var fb=document.querySelectorAll("[data-filter]");
-fb.forEach(function(b){b.addEventListener("click",function(){var f=b.getAttribute("data-filter");
-  fb.forEach(function(x){x.setAttribute("aria-pressed",String(x===b));});
-  document.querySelectorAll(".shelf>li").forEach(function(li){li.hidden=!(f==="all"||li.getAttribute("data-vis")===f);});
-  build();refAnim();drawAll();});});
-
 /* ---------- notebooks: pointer tilt + parallax, click opens a 3D reader ---------- */
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
 var reader=document.getElementById("reader"),rbook=document.getElementById("rd-book"),lastTrigger=null,dialog=reader&&reader.querySelector(".rd-dialog");
@@ -323,15 +327,15 @@ function openReader(a){
   var d=li.dataset,cv=d.pal?' data-pal="'+esc(d.pal)+'"':"";
   var leaves="";for(var k=1;k<=5;k++)leaves+='<div class="rd-leaf" style="--k:'+k+'"><i class="fr paper"></i><i class="bk paper">'+(k===5?'<b class="ruled">notes</b>':'')+'</i></div>';
   rbook.innerHTML='<span class="rd-shadow" aria-hidden="true"></span>'+
-    '<div class="rd-page paper"><p class="eyebrow">trip journal · <span class="badge '+esc(d.vis)+'">'+esc(d.vis)+'</span></p>'+
+    '<div class="rd-page paper"><p class="eyebrow">trip journal</p>'+
     '<h2 id="rd-title">'+esc(d.title)+'</h2><span class="dt">'+esc(d.date)+'</span>'+
-    '<div class="stats2"><span>'+esc(d.stats)+'</span><span>visibility: '+esc(d.vis)+'</span></div>'+
+    '<div class="stats2"'+(d.stats?'':' hidden')+'><span>'+esc(d.stats||"")+'</span></div>'+
     '<p>'+esc(d.blurb)+'</p><a class="read" href="'+esc(d.href)+'">Read entry →</a></div>'+leaves+
     '<div class="rd-cover" aria-hidden="true"><i class="fr">'+(d.photo?'<img class="pix" src="'+esc(d.photo)+'" width="168" height="175" alt="">':'<canvas class="pix" data-scene="thumb" data-seed="'+esc(d.seed)+'" data-variant="'+esc(d.variant)+'"'+cv+' width="100" height="104"></canvas>')+
     '<span class="cap"><span class="dt">'+esc(d.date)+'</span><span class="ti">'+esc(d.title)+'</span></span></i><i class="bk">Trip journal</i></div>';
   var mob=mobileNow();rbook.style.setProperty("--prx",(mob?-3:-5)+"deg");rbook.style.setProperty("--pry",(mob?-7:-12)+"deg");
   reader.hidden=false;document.querySelector("main").setAttribute("inert","");document.body.style.overflow="hidden";
-  build();refAnim();drawAll();
+  build(true);
   function land(){state="open";rbook.classList.add("landed");var rl=rbook.querySelector(".read");if(rl)rl.focus({preventScroll:true});}
   dialog.focus({preventScroll:true});
   if(reduce){li.classList.add("away");rbook.classList.add("open","up");reader.classList.add("on");land();return;}
@@ -350,7 +354,7 @@ function closeReader(){
     if(li)li.classList.remove("away");reader.hidden=true;rbook.innerHTML="";rbook.className="rd-book";flyEl.style.cssText="";
     document.querySelector("main").removeAttribute("inert");document.body.style.overflow="";reader.classList.remove("on");
     if(a){a.setAttribute("aria-expanded","false");a.focus({preventScroll:true});}
-    state="closed";build();refAnim();drawAll();}
+    state="closed";build(true);}
   if(reduce){finish();return;}
   var wasOpen=rbook.classList.contains("open");
   /* phase 1: cover and pages close */
@@ -371,13 +375,17 @@ if(reader){
 
 /* ---------- terminal status typewriter ---------- */
 var st=document.getElementById("status-text");
-if(st){var lines=["somewhere above treeline [placeholder]","building things that scrape the web [placeholder]","planning the next loop hike [placeholder]"],li=0,ci=0,dir=1;
-  st.textContent=lines[0];
-  if(!reduce){ci=lines[0].length;dir=-1;
-    setInterval(function(){var s=lines[li];
-      if(dir>0){ci++;if(ci>=s.length){dir=0;setTimeout(function(){dir=-1;},2600);}}
-      else if(dir<0){ci--;if(ci<=0){li=(li+1)%lines.length;dir=1;}}
-      st.textContent=lines[li].slice(0,ci);},55);}}
+if(st){var lines=["somewhere above treeline [placeholder]","building things that scrape the web [placeholder]","planning the next loop hike [placeholder]"],li=0,ci=lines[0].length,dir=-1,sv=true,tm=0;
+  st.textContent=lines[0];   /* screen readers get the static #status-sr text; the animated copy is aria-hidden */
+  function step(){tm=0;if(!sv||document.hidden)return;var s=lines[li],dl=55;
+    if(dir>0){ci++;if(ci>=s.length){dir=0;dl=2600;}}
+    else if(dir<0){ci--;if(ci<=0){li=(li+1)%lines.length;dir=1;}}
+    else dir=-1;
+    st.textContent=lines[li].slice(0,ci);tm=setTimeout(step,dl);}
+  function go(){if(!reduce&&!tm&&sv&&!document.hidden)tm=setTimeout(step,2600);}
+  if(!reduce){if("IntersectionObserver" in window)new IntersectionObserver(function(es){sv=es[0].isIntersecting;if(sv)go();}).observe(st.parentNode);go();
+    document.addEventListener("visibilitychange",go);}
+}
 })();
 
 /* ---------- photo figures: dithered by default, "develops" to colour; click for lightbox ---------- */
