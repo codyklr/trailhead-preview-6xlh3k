@@ -24,7 +24,10 @@
    "lat": 44.39,
    "lon": -68.2,
    "date": "2026-10",
-   "href": "trips/acadia-2026-10/"
+   "href": "trips/acadia-2026-10/",
+   "hrefs": [
+    "trips/acadia-2026-10/"
+   ]
   },
   {
    "id": "new-york-city-ny",
@@ -33,7 +36,11 @@
    "lat": 40.71,
    "lon": -74.01,
    "date": "2026-10",
-   "href": "trips/nyc-2026-10/"
+   "href": "trips/nyc-2026-10/",
+   "hrefs": [
+    "trips/nyc-2026-10/",
+    "trips/met-armor-2026-10/"
+   ]
   },
   {
    "id": "boston",
