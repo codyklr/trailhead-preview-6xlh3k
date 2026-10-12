@@ -523,6 +523,29 @@ function gLink(){
     if(!on||!b||e.pointerType!=="mouse"||gHoriz())return;var l=byPin[b.getAttribute("data-id")];if(l){lifted=l;l.forEach(function(k){k.querySelector(".book").classList.add("force-hover");});}}
   gpins.addEventListener("pointerover",function(e){lift(true,e);});gpins.addEventListener("pointerout",function(e){lift(false,e);});
 }
+/* trips scroller: mouse/pen click-and-drag with a momentum glide (touch keeps the browser's native scroll + inertia).
+   Glide: v decays as exp(-dt/TAU); stops below VMIN or at the ends. A drag over 5px swallows the click on the book. */
+function gDragScroll(){var sc=gSc;if(!sc)return;var TAU=325,VMIN=.02,VMAX=4.5,TH=5;
+  var d=null,v=0,raf=0,last=0,eat=0;
+  function H(){return mobileNow();}
+  function pos(){return H()?sc.scrollLeft:sc.scrollTop;}
+  function max(){return H()?sc.scrollWidth-sc.clientWidth:sc.scrollHeight-sc.clientHeight;}
+  function set(p){if(H())sc.scrollLeft=p;else sc.scrollTop=p;}
+  function stop(){if(raf)cancelAnimationFrame(raf);raf=0;v=0;sc.classList.remove("glide");}
+  function glide(ts){var dt=Math.min(40,ts-last);last=ts;var p=pos()+v*dt;v*=Math.exp(-dt/TAU);
+    if(p<=0||p>=max()){set(Math.max(0,Math.min(max(),p)));stop();return;}set(p);if(Math.abs(v)<VMIN){stop();return;}raf=requestAnimationFrame(glide);}
+  sc.addEventListener("pointerdown",function(e){stop();if(e.pointerType==="touch"||e.button!==0)return;
+    d={id:e.pointerId,c:H()?e.clientX:e.clientY,s:pos(),on:false,hist:[[performance.now(),H()?e.clientX:e.clientY]]};});
+  sc.addEventListener("pointermove",function(e){if(!d||e.pointerId!==d.id)return;var c=H()?e.clientX:e.clientY,dd=c-d.c;
+    if(!d.on){if(Math.abs(dd)<TH)return;d.on=true;sc.classList.add("glide");try{sc.setPointerCapture(e.pointerId);}catch(_){}}
+    set(d.s-dd);var t=performance.now();d.hist.push([t,c]);while(d.hist.length>2&&t-d.hist[0][0]>90)d.hist.shift();e.preventDefault();});
+  function up(e){if(!d||e.pointerId!==d.id)return;var was=d.on,h=d.hist;d=null;if(!was)return;eat=Date.now()+60;
+    var a=h[0],b=h[h.length-1],dt=b[0]-a[0];v=(dt>8&&performance.now()-b[0]<60)?-(b[1]-a[1])/dt:0;v=Math.max(-VMAX,Math.min(VMAX,v));
+    if(reduce||Math.abs(v)<VMIN){stop();return;}last=performance.now();raf=requestAnimationFrame(glide);}
+  sc.addEventListener("pointerup",up);sc.addEventListener("pointercancel",function(e){if(d&&e.pointerId===d.id){d=null;stop();}});
+  sc.addEventListener("click",function(e){if(Date.now()<eat){e.preventDefault();e.stopPropagation();}},true);
+  sc.addEventListener("dragstart",function(e){e.preventDefault();});
+  sc.addEventListener("wheel",stop,{passive:true});}
 /* timeline + list */
 function gUI(){var d=G.d,ix=function(s){var p=s.split("-");return +p[0]*12+ +p[1]-1;},idx=d.places.map(function(p){return ix(p.date);}),mx=Math.max.apply(null,idx),mn=Math.min.apply(null,idx),lo=Math.min(mn,mx-5);
   var tl=document.getElementById("gtime");tl.innerHTML="";
@@ -546,7 +569,7 @@ function gUI(){var d=G.d,ix=function(s){var p=s.split("-");return +p[0]*12+ +p[1
   document.getElementById("g-out").addEventListener("click",function(){gFly(G.lon,G.lat,G.zoom/1.8);});
   var sp=document.getElementById("g-spin");if(reduce){G.paused=true;sp.hidden=true;}sp.addEventListener("click",function(){G.paused=!G.paused;sp.setAttribute("aria-pressed",G.paused);sp.textContent=G.paused?"Spin":"Pause spin";gKick();});}
 if(gcv&&gwrap){
-  var gdone=0;function gGo(){if(++gdone<4)return;gInitGL();gMake();gUI();gDrag();gLink();gSize();gRender();gKick();var gh=document.getElementById("ghint"),seen=false;try{seen=sessionStorage.getItem("ghint");}catch(_){}if(gh&&!seen){gh.classList.add("on");setTimeout(function(){gh.classList.remove("on");},6000);}
+  var gdone=0;function gGo(){if(++gdone<4)return;gInitGL();gMake();gUI();gDrag();gLink();gDragScroll();gSize();gRender();gKick();var gh=document.getElementById("ghint"),seen=false;try{seen=sessionStorage.getItem("ghint");}catch(_){}if(gh&&!seen){gh.classList.add("on");setTimeout(function(){gh.classList.remove("on");},6000);}
     if("IntersectionObserver" in window)new IntersectionObserver(function(es){G.vis=es[0].isIntersecting;if(G.vis){G.last=0;G.dirty=1;gKick();}}).observe(gwrap);
     if("ResizeObserver" in window)new ResizeObserver(function(){G.dirty=1;gKick();}).observe(gframe);
     document.addEventListener("visibilitychange",function(){if(!document.hidden){G.dirty=1;gKick();}});}
