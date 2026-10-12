@@ -604,10 +604,26 @@ function clearTimers(){timers.forEach(clearTimeout);timers=[];}
 function mobileNow(){return window.matchMedia&&matchMedia("(max-width: 720px)").matches;}
 /* FLIP: transform that maps the centered reader book onto the shelf book's position/size/tilt */
 function flipTransform(a){
+  /* measure untransformed layout boxes so the 3D tilt/lift and shadows don't skew the scale */
+  var at=a.style.transform,att=a.style.transition,bt=rbook.style.transform,ft=flyEl.style.transform;
+  a.style.transition="none";a.style.transform="none";rbook.style.transform="none";flyEl.style.transform="none";
   var ar=a.getBoundingClientRect(),br=rbook.getBoundingClientRect();
-  var dx=(ar.left+ar.width/2)-(br.left+br.width/2),dy=(ar.top+ar.height/2)-(br.top+br.height/2),s=ar.width/br.width;
+  a.style.transform=at;rbook.style.transform=bt;flyEl.style.transform=ft;void a.offsetWidth;a.style.transition=att;
+  var dx=(ar.left+ar.width/2)-(br.left+br.width/2),dy=(ar.top+ar.height/2)-(br.top+br.height/2),s=ar.width/br.width,sy=ar.height/br.height;
   var r=parseFloat(getComputedStyle(a.closest("li")).getPropertyValue("--r"))||0;if(mobileNow())r*=.6;
-  return "translate("+dx.toFixed(1)+"px,"+dy.toFixed(1)+"px) scale("+s.toFixed(4)+") rotateZ("+r+"deg)";}
+  return "translate("+dx.toFixed(1)+"px,"+dy.toFixed(1)+"px) scale("+s.toFixed(4)+","+sy.toFixed(4)+") rotateZ("+r+"deg)";}
+/* the shelf book posed exactly like the landing reader book, so the swap at the end of close is invisible */
+function restPose(a){var r=parseFloat(getComputedStyle(a.closest("li")).getPropertyValue("--r"))||0;if(mobileNow())r*=.6;
+  return "translateY(var(--dy,0px)) rotateZ("+r+"deg) rotateX("+(rbook.style.getPropertyValue("--prx")||"-5deg")+") rotateY("+(rbook.style.getPropertyValue("--pry")||"-12deg")+")";}
+/* then ease from that pose into its normal resting/hover/active transform (tilt eases back in) */
+function handBack(a,cr){a.style.transition="none";a.style.transform=restPose(a);
+  /* absorb the small leftover offset from the two different perspectives, then ease it out too */
+  var fr=a.querySelector(".f-front");if(cr&&fr){fr=fr.getBoundingClientRect();
+    var ox=(cr.left+cr.width/2)-(fr.left+fr.width/2),oy=(cr.top+cr.height/2)-(fr.top+fr.height/2);
+    if(Math.abs(ox)<40&&Math.abs(oy)<40)a.style.transform="translate("+ox.toFixed(1)+"px,"+oy.toFixed(1)+"px) "+restPose(a);}
+  void a.offsetWidth;
+  requestAnimationFrame(function(){a.style.transition="transform .42s cubic-bezier(.25,.7,.3,1)";a.style.transform="";
+    setTimeout(function(){a.style.transition="";},460);});}
 function openReader(a){
   if(!reader||state!=="closed")return;state="opening";
   var li=a.closest("li");curLi=li;lastTrigger=a;a.setAttribute("aria-expanded","true");
@@ -638,7 +654,7 @@ function closeReader(){
   if(!reader||reader.hidden||state==="closing"||state==="closed")return;state="closing";clearTimers();
   var a=lastTrigger,li=curLi;
   function finish(){
-    Sound.play("thud");if(li)li.classList.remove("away");reader.hidden=true;rbook.innerHTML="";rbook.className="rd-book";flyEl.style.cssText="";
+    var cv=rbook.querySelector(".rd-cover"),cr=cv&&cv.getBoundingClientRect();Sound.play("thud");if(li)li.classList.remove("away");if(a&&!reduce)handBack(a,cr);reader.hidden=true;rbook.innerHTML="";rbook.className="rd-book";flyEl.style.cssText="";
     document.querySelector("main").removeAttribute("inert");document.body.style.overflow="";reader.classList.remove("on");
     if(a){a.setAttribute("aria-expanded","false");a.focus({preventScroll:true});}
     state="closed";build(true);}
@@ -648,7 +664,7 @@ function closeReader(){
   rbook.classList.remove("landed");rbook.classList.remove("open");if(wasOpen)Sound.play("close");
   /* phase 2: float back down, shrink, settle into the exact resting spot and tilt */
   later(function(){
-    Sound.play("down");flyEl.style.transform=flipTransform(a);rbook.classList.add("pre");rbook.classList.remove("up");reader.classList.remove("on");
+    Sound.play("down");if(a){a.style.transition="none";a.style.transform=restPose(a);}flyEl.style.transform=flipTransform(a);rbook.classList.add("pre");rbook.classList.remove("up");reader.classList.remove("on");
     later(finish,740);},wasOpen?760:0);
 }
 if(reader){
