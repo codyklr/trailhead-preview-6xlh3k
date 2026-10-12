@@ -93,7 +93,7 @@ span.cur{display:inline-block;width:.6em;height:1.05em;background:var(--ink);ver
 .f{position:absolute;display:block}
 .f-front{position:relative;transform:translateZ(7px);background:var(--bg);border:1px solid var(--ink)}
 .f-front::after{content:"";position:absolute;inset:0;pointer-events:none;
-  background:url(assets/dither-h.png?v=b79d70c1) left top/calc(8*var(--dp)) calc(8*var(--dp)) repeat-y,url(assets/dither-v.png?v=b79d70c1) left bottom/calc(8*var(--dp)) calc(8*var(--dp)) repeat-x;image-rendering:pixelated;opacity:.6;
+  background:url(assets/dither-h.png?v=448a0891) left top/calc(8*var(--dp)) calc(8*var(--dp)) repeat-y,url(assets/dither-v.png?v=448a0891) left bottom/calc(8*var(--dp)) calc(8*var(--dp)) repeat-x;image-rendering:pixelated;opacity:.6;
 }
 .f-front::before{content:"";position:absolute;left:0;top:0;bottom:0;width:7px;background:var(--ink);opacity:.9;z-index:1}
 .f-back{inset:0;transform:translateZ(-7px) rotateY(180deg);background:var(--ink)}
@@ -143,7 +143,7 @@ span.cur{display:inline-block;width:.6em;height:1.05em;background:var(--ink);ver
   -webkit-mask-image:linear-gradient(135deg,transparent 5%,#000 50%,transparent 100%);mask-image:linear-gradient(135deg,transparent 5%,#000 50%,transparent 100%)}
 .rd-book.up .rd-shadow{opacity:.42;transform:translateZ(-30px) translate(10px,16px) scale(1.05)}
 .rd-page,.rd-leaf,.rd-cover{position:absolute;inset:0;transform-origin:left center}
-.paper{background:var(--bg) url(assets/dither-paper.png?v=b79d70c1) 0 0/calc(16*var(--dp)) calc(16*var(--dp));border:1px solid var(--ink)}
+.paper{background:var(--bg) url(assets/dither-paper.png?v=448a0891) 0 0/calc(16*var(--dp)) calc(16*var(--dp));border:1px solid var(--ink)}
 .rd-page{padding:1.6rem 1.4rem 1.4rem 1.9rem;display:flex;flex-direction:column;pointer-events:auto;overflow:hidden}
 .rd-page::before{content:"";position:absolute;left:0;top:0;bottom:0;width:7px;background:var(--ink)}
 .rd-page .eyebrow{margin-bottom:.9rem}.rd-page .eyebrow::after{display:none}
@@ -155,7 +155,7 @@ span.cur{display:inline-block;width:.6em;height:1.05em;background:var(--ink);ver
 .rd-leaf{transform-style:preserve-3d;transform:translateZ(calc((6 - var(--k))*.6px)) rotateY(0deg);transition:transform .5s cubic-bezier(.45,.05,.3,1);transition-delay:calc((5 - var(--k))*.04s)}
 .rd-leaf>i{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}
 .rd-leaf>i.bk{transform:rotateY(180deg)}
-.rd-leaf>i::after{content:"";position:absolute;inset:0;background:url(assets/dither-h.png?v=b79d70c1) right top/calc(8*var(--dp)) calc(8*var(--dp)) repeat-y;transform:scaleX(-1);opacity:.45}
+.rd-leaf>i::after{content:"";position:absolute;inset:0;background:url(assets/dither-h.png?v=448a0891) right top/calc(8*var(--dp)) calc(8*var(--dp)) repeat-y;transform:scaleX(-1);opacity:.45}
 .rd-book.open .rd-leaf{transform:translateZ(calc((6 - var(--k))*.6px)) rotateY(calc(-176deg + var(--k)*1.2deg));transition-delay:calc(.28s + var(--k)*.075s)}
 .rd-cover{transform-style:preserve-3d;transform:translateZ(5px) rotateY(0deg);transition:transform .7s cubic-bezier(.5,0,.2,1)}
 .rd-book.open .rd-cover{transform:translateZ(5px) rotateY(-180deg);transition-duration:.85s}
@@ -164,7 +164,7 @@ span.cur{display:inline-block;width:.6em;height:1.05em;background:var(--ink);ver
 .rd-cover>i.fr::before{content:"";position:absolute;left:0;top:0;bottom:0;width:8px;background:var(--ink);z-index:1}
 .rd-cover>i.fr canvas,.rd-cover>i.fr img.pix{margin-left:8px;border-bottom:1px solid var(--ink)}
 .rd-cover>i.fr .cap{padding-left:1.4rem}
-.rd-cover>i.bk{transform:rotateY(180deg);background:var(--bg2) url(assets/dither-paper.png?v=b79d70c1) 0 0/calc(16*var(--dp)) calc(16*var(--dp));border:1px solid var(--ink);font:11px/1.6 var(--pixel);text-transform:uppercase;padding:1.5rem;color:var(--muted);letter-spacing:.06em}
+.rd-cover>i.bk{transform:rotateY(180deg);background:var(--bg2) url(assets/dither-paper.png?v=448a0891) 0 0/calc(16*var(--dp)) calc(16*var(--dp));border:1px solid var(--ink);font:11px/1.6 var(--pixel);text-transform:uppercase;padding:1.5rem;color:var(--muted);letter-spacing:.06em}
 .rd-close{position:absolute;top:1rem;right:1rem;pointer-events:auto;background:var(--bg)}
 @media(max-width:720px){.rd-book{--shift:0px;--W:min(340px,88vw);--H:calc(var(--W)*1.5)}.rd-close{top:.6rem;right:.6rem}
   .rd-page{padding:1.6rem 1.3rem 1.4rem 1.7rem}.rd-page p{font-size:16.5px}.rd-page .stats2{flex-wrap:wrap;gap:.3rem 1rem;font-size:12.5px}
@@ -426,7 +426,7 @@ main.nf .eyebrow{margin-top:0}
 .atlas .shelf>li{flex:none;width:min(100%,290px);margin:0 0 0 6%}
 .atlas .shelf>li:nth-child(even){margin:0 6% 0 auto}
 /* ordered-Bayer dither fade on the scroller edges (baked masks from tools/make_fade.py; union of 3 layers, so no mask-composite needed) */
-.fade{--s:linear-gradient(#000,#000);--ft:url(assets/dither-ft.png?v=b79d70c1);--fb:url(assets/dither-fb.png?v=b79d70c1);--F:calc(16*var(--dp));--m1:var(--ft);--m3:var(--fb);
+.fade{--s:linear-gradient(#000,#000);--ft:url(assets/dither-ft.png?v=448a0891);--fb:url(assets/dither-fb.png?v=448a0891);--F:calc(16*var(--dp));--m1:var(--ft);--m3:var(--fb);
   -webkit-mask-image:var(--m1),var(--s),var(--m3);mask-image:var(--m1),var(--s),var(--m3);
   -webkit-mask-size:calc(8*var(--dp)) var(--F),100% calc(100% - 2*var(--F)),calc(8*var(--dp)) var(--F);mask-size:calc(8*var(--dp)) var(--F),100% calc(100% - 2*var(--F)),calc(8*var(--dp)) var(--F);
   -webkit-mask-position:0 0,0 var(--F),0 100%;mask-position:0 0,0 var(--F),0 100%;
@@ -448,7 +448,7 @@ li.act .book{transition:transform .16s ease-out}
   .atlas .shelf>li,.atlas .shelf>li:nth-child(even){width:min(62vw,250px);margin:0 1.6rem 0 0}
   .atlas-map .gside{order:3;margin-top:1.2rem}
   .atlas-map .gl{display:block}
-  .fade{--ft:url(assets/dither-flm.png?v=b79d70c1);--fb:url(assets/dither-frm.png?v=b79d70c1);
+  .fade{--ft:url(assets/dither-flm.png?v=448a0891);--fb:url(assets/dither-frm.png?v=448a0891);
     -webkit-mask-size:var(--F) calc(8*var(--dp)),calc(100% - 2*var(--F)) 100%,var(--F) calc(8*var(--dp));mask-size:var(--F) calc(8*var(--dp)),calc(100% - 2*var(--F)) 100%,var(--F) calc(8*var(--dp));
     -webkit-mask-position:0 0,var(--F) 0,100% 0;mask-position:0 0,var(--F) 0,100% 0;
     -webkit-mask-repeat:repeat-y,no-repeat,repeat-y;mask-repeat:repeat-y,no-repeat,repeat-y}
@@ -457,3 +457,5 @@ li.act .book{transition:transform .16s ease-out}
 .atlas .shelf{cursor:grab}
 .atlas .shelf.glide{cursor:grabbing;scroll-snap-type:none!important;scroll-behavior:auto!important;-webkit-user-select:none;user-select:none}
 .atlas .shelf.glide .book{cursor:grabbing}
+/* reserve the scrollbar lane so locking page scroll (reader/lightbox) never changes the layout width */
+html{scrollbar-gutter:stable}

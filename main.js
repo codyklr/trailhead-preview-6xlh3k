@@ -515,7 +515,7 @@ function gLink(){
   lis.forEach(function(li){var id=li._id,bk=li.querySelector(".book");if(!id||!bk)return;
     bk.addEventListener("pointerenter",function(e){if(e.pointerType!=="mouse")return;hoverId=id;act(id);});
     bk.addEventListener("pointerleave",function(e){if(e.pointerType!=="mouse")return;hoverId=null;act(near());});
-    bk.addEventListener("focus",function(){hoverId=id;act(id);});bk.addEventListener("blur",function(){hoverId=null;});});
+    bk.addEventListener("focus",function(){if(!bk.matches(":focus-visible")||document.getElementById("reader").hidden===false)return;hoverId=id;act(id);});bk.addEventListener("blur",function(){if(hoverId===id)hoverId=null;});});
   /* first time the trips come into view: light the nearest trip (globe turns to it) */
   if("IntersectionObserver" in window){var io2=new IntersectionObserver(function(es){if(es[0].isIntersecting&&!seen){seen=true;io2.disconnect();act(near());}},{threshold:.2});io2.observe(gSc);}else{seen=true;}
   /* pin hover lifts its book (mouse, desktop layout) */
