@@ -759,11 +759,11 @@ function showHome(hash){
     setName(art,false);v.forEach(function(x){if(x)x.remove();});spa.view=null;
     homeMain.id="main";homeMain.hidden=false;if(homeFoot)homeFoot.hidden=false;document.title=spa.homeTitle;
     build();kick();
-    if(hash){var t=document.getElementById(hash.slice(1));if(t){t.scrollIntoView({behavior:"instant"});}spa.book=null;return;}
+    if(hash){try{history.replaceState({spa:"home"},"",HOME+hash);}catch(e){}var t=document.getElementById(hash.slice(1));if(t){t.scrollIntoView({behavior:"instant"});}spa.book=null;return;}
     window.scrollTo({top:spa.homeY,left:0,behavior:"instant"});
-    if(b){openReader(b,true);var pg=rbook.querySelector(".rd-page");setName(pg,true);spa.sheetFrom=pg&&pg.getBoundingClientRect();}
+    if(b){reader.classList.add("instant");openReader(b,true);void rbook.offsetWidth;var pg=rbook.querySelector(".rd-page");setName(pg,true);spa.sheetFrom=pg&&pg.getBoundingClientRect();}
     else homeMain.focus&&homeMain.setAttribute("tabindex","-1"),homeMain.focus({preventScroll:true});
-  },function(){var pg=rbook.querySelector(".rd-page");setName(pg,false);spa.busy=false;say(b?"Home. Journal reopened.":"Home");});}
+  },function(){var pg=rbook.querySelector(".rd-page");setName(pg,false);requestAnimationFrame(function(){requestAnimationFrame(function(){reader.classList.remove("instant");});});spa.busy=false;say(b?"Home. Journal reopened.":"Home");});}
 spa.homeTitle=document.title;
 if(reader&&history.pushState&&window.fetch&&window.DOMParser){
   history.replaceState({spa:"home"},"");try{history.scrollRestoration="manual";}catch(e){}
@@ -776,11 +776,13 @@ if(reader&&history.pushState&&window.fetch&&window.DOMParser){
   document.addEventListener("click",function(e){if(!spa.view||e.defaultPrevented||e.button>0||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;
     var a=e.target.closest&&e.target.closest("a[href]");if(!a)return;var hr=a.getAttribute("href"),u=new URL(hr,hr.charAt(0)==="#"?HOME:location.href);
     if(u.origin+u.pathname!==HOME)return;e.preventDefault();
+    /* "back to trips" = the same as Back: home at the old scroll position with the notebook already open */
+    if(a.hasAttribute("data-soft-back")&&history.state&&history.state.spa==="entry"&&spa.book){spa.pendingHash=null;history.back();return;}
     if(history.state&&history.state.spa==="entry"){spa.pendingHash=u.hash||null;spa.book=u.hash?null:spa.book;history.back();}
     else{history.pushState({spa:"home"},"",u.href);showHome(u.hash);}});
   window.addEventListener("popstate",function(e){var st=e.state||{};
     if(st.spa==="entry"&&!spa.view){spa.busy=true;fetchEntry(st.href).then(function(doc){showEntry(doc,st.href,false,false);}).catch(function(){location.reload();});}
-    else if(st.spa!=="entry"&&spa.view){var h=spa.pendingHash||(location.hash||null);spa.pendingHash=null;showHome(h);}});
+    else if(st.spa!=="entry"&&spa.view){var h=spa.pendingHash!==undefined?spa.pendingHash:(spa.book?null:(location.hash||null));spa.pendingHash=undefined;showHome(h);}});
 }
 
 })();

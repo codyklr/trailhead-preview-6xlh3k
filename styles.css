@@ -171,7 +171,7 @@ section.hero.wrap{padding-top:clamp(1.25rem,4vh,2.75rem);padding-bottom:0}
   -webkit-mask-image:linear-gradient(135deg,transparent 5%,#000 50%,transparent 100%);mask-image:linear-gradient(135deg,transparent 5%,#000 50%,transparent 100%)}
 .rd-book.up .rd-shadow{opacity:.42;transform:translateZ(-30px) translate(10px,16px) scale(1.05)}
 .rd-page,.rd-leaf,.rd-cover{position:absolute;inset:0;transform-origin:left center}
-.paper{background:var(--bg) url(assets/dither-paper.png?v=e66380b0) 0 0/calc(16*var(--dp)) calc(16*var(--dp));border:1px solid var(--ink)}
+.paper{background:var(--bg) url(assets/dither-paper.png?v=22539b40) 0 0/calc(16*var(--dp)) calc(16*var(--dp));border:1px solid var(--ink)}
 .rd-page{padding:1.6rem 1.4rem 1.4rem 1.9rem;display:flex;flex-direction:column;pointer-events:auto;overflow:hidden}
 .rd-page::before{content:"";position:absolute;left:0;top:0;bottom:0;width:7px;background:var(--ink)}
 .rd-page .eyebrow{margin-bottom:.9rem}.rd-page .eyebrow::after{display:none}
@@ -195,7 +195,7 @@ section.hero.wrap{padding-top:clamp(1.25rem,4vh,2.75rem);padding-bottom:0}
 .rd-face{position:absolute;left:0;top:0;display:block;transform-origin:0 0;background:var(--bg);border:1px solid var(--ink);box-sizing:border-box;color:var(--ink)}
 .rd-face::before{content:"";position:absolute;left:0;top:0;bottom:0;width:7px;background:var(--ink);opacity:.9;z-index:1}
 .rd-face img.pix,.rd-face canvas{border-bottom:1px solid var(--ink);margin-left:7px;width:calc(100% - 7px);box-sizing:border-box;display:block}
-.rd-cover>i.bk{transform:rotateY(180deg);background:var(--bg2) url(assets/dither-paper.png?v=e66380b0) 0 0/calc(16*var(--dp)) calc(16*var(--dp));border:1px solid var(--ink);font:11px/1.6 var(--pixel);text-transform:uppercase;padding:1.5rem;color:var(--muted);letter-spacing:.06em}
+.rd-cover>i.bk{transform:rotateY(180deg);background:var(--bg2) url(assets/dither-paper.png?v=22539b40) 0 0/calc(16*var(--dp)) calc(16*var(--dp));border:1px solid var(--ink);font:11px/1.6 var(--pixel);text-transform:uppercase;padding:1.5rem;color:var(--muted);letter-spacing:.06em}
 .rd-close{position:absolute;top:1rem;right:1rem;pointer-events:auto;background:var(--bg)}
 @media(max-width:720px){.rd-book{--shift:0px;--W:min(340px,88vw);--H:calc(var(--W)*1.5)}.rd-close{top:.6rem;right:.6rem}
   .rd-page{padding:1.6rem 1.3rem 1.4rem 1.7rem}.rd-page p{font-size:16.5px}.rd-page .stats2{flex-wrap:wrap;gap:.3rem 1rem;font-size:12.5px}
@@ -452,7 +452,7 @@ main.nf .eyebrow{margin-top:0}
 .atlas .shelf>li{flex:none;width:min(100%,290px);margin:0 0 0 6%}
 .atlas .shelf>li:nth-child(even){margin:0 6% 0 auto}
 /* ordered-Bayer dither fade on the scroller edges (baked masks from tools/make_fade.py; union of 3 layers, so no mask-composite needed) */
-.fade{--s:linear-gradient(#000,#000);--ft:url(assets/dither-ft.png?v=e66380b0);--fb:url(assets/dither-fb.png?v=e66380b0);--F:calc(16*var(--dp));--m1:var(--ft);--m3:var(--fb);
+.fade{--s:linear-gradient(#000,#000);--ft:url(assets/dither-ft.png?v=22539b40);--fb:url(assets/dither-fb.png?v=22539b40);--F:calc(16*var(--dp));--m1:var(--ft);--m3:var(--fb);
   -webkit-mask-image:var(--m1),var(--s),var(--m3);mask-image:var(--m1),var(--s),var(--m3);
   -webkit-mask-size:calc(8*var(--dp)) var(--F),100% calc(100% - 2*var(--F)),calc(8*var(--dp)) var(--F);mask-size:calc(8*var(--dp)) var(--F),100% calc(100% - 2*var(--F)),calc(8*var(--dp)) var(--F);
   -webkit-mask-position:0 0,0 var(--F),0 100%;mask-position:0 0,0 var(--F),0 100%;
@@ -474,7 +474,7 @@ li.act .book{transition:transform .16s ease-out}
   .atlas .shelf>li,.atlas .shelf>li:nth-child(even){width:min(62vw,250px);margin:0 1.6rem 0 0}
   .atlas-map .gside{order:3;margin-top:1.2rem}
   .atlas-map .gl{display:block}
-  .fade{--ft:url(assets/dither-flm.png?v=e66380b0);--fb:url(assets/dither-frm.png?v=e66380b0);
+  .fade{--ft:url(assets/dither-flm.png?v=22539b40);--fb:url(assets/dither-frm.png?v=22539b40);
     -webkit-mask-size:var(--F) calc(8*var(--dp)),calc(100% - 2*var(--F)) 100%,var(--F) calc(8*var(--dp));mask-size:var(--F) calc(8*var(--dp)),calc(100% - 2*var(--F)) 100%,var(--F) calc(8*var(--dp));
     -webkit-mask-position:0 0,var(--F) 0,100% 0;mask-position:0 0,var(--F) 0,100% 0;
     -webkit-mask-repeat:repeat-y,no-repeat,repeat-y;mask-repeat:repeat-y,no-repeat,repeat-y}
@@ -554,3 +554,19 @@ footer .cairn{order:2}
 .spa-sheet{position:fixed;inset:0;z-index:400;pointer-events:none}
 main.spa-entry h1:focus{outline:none}
 @media(prefers-reduced-motion:reduce){::view-transition-old(root),::view-transition-new(root){animation-duration:.2s!important;animation-delay:0s!important}}
+/* Back from a soft entry: the notebook is restored already open, no lift/tilt/unfold replay */
+.reader.instant,.reader.instant *{transition:none!important;animation:none!important}
+/* entry breadcrumb: small catalogue label, not a second nav bar */
+nav.crumbs{display:block;margin:0 0 1.2rem;padding:0;border:0;grid-area:auto;gap:0}
+.crumbs ol{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;align-items:center;font:11px/1.4 var(--pixel);text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.crumbs li{display:flex;align-items:center}
+.crumbs li+li::before{content:"›";margin:0 .6rem;color:var(--accent)}
+.crumbs a{display:inline-flex;align-items:center;min-height:24px;padding:0;flex:none;opacity:1;color:var(--ink);text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
+.crumbs a:hover{color:var(--accent);text-decoration-color:var(--accent)}
+.crumbs [aria-current]{color:var(--accent)}
+@media(max-width:720px){.crumbs a{min-height:44px}nav.crumbs{margin-bottom:.4rem}}
+/* entry top row: breadcrumb on the left, back to trips on the right */
+.entry-top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.4rem 1.5rem;margin:0 0 1.2rem;padding-bottom:.5rem;border-bottom:1px dashed var(--line)}
+.entry-top nav.crumbs{margin:0}
+.back-top{font:12px var(--mono);display:inline-flex;align-items:center;min-height:24px;text-decoration:underline;text-decoration-color:var(--accent);text-underline-offset:3px}
+@media(max-width:720px){.back-top{min-height:44px}.entry-top{gap:0 1rem}}
