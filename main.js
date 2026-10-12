@@ -625,7 +625,7 @@ function handBack(a,cr){a.style.transition="none";a.style.transform=restPose(a);
   requestAnimationFrame(function(){a.style.transition="transform .42s cubic-bezier(.25,.7,.3,1)";a.style.transform="";
     setTimeout(function(){a.style.transition="";},460);});}
 function openReader(a){
-  if(!reader||state!=="closed")return;state="opening";
+  if(!reader||state!=="closed")return;state="opening";clearTimers();rbook.style.opacity="";rbook.style.transition="";reader.style.pointerEvents="";
   var li=a.closest("li");curLi=li;lastTrigger=a;a.setAttribute("aria-expanded","true");
   var d=li.dataset,cv=d.pal?' data-pal="'+esc(d.pal)+'"':"";
   var leaves="";for(var k=1;k<=5;k++)leaves+='<div class="rd-leaf" style="--k:'+k+'"><i class="fr paper"></i><i class="bk paper">'+(k===5?'<b class="ruled">notes</b>':'')+'</i></div>';
@@ -637,7 +637,14 @@ function openReader(a){
     '<div class="rd-cover" aria-hidden="true"><i class="fr">'+(d.photo?'<img class="pix" src="'+esc(Dither.dp()===2?d.photo.replace("-cover.png","-cover-s.png"):d.photo)+'" width="80" height="83" alt="">':'<canvas class="pix" data-scene="thumb" data-seed="'+esc(d.seed)+'" data-variant="'+esc(d.variant)+'"'+cv+' width="100" height="104"></canvas>')+
     '<span class="cap"><span class="dt">'+esc(d.date)+'</span><span class="ti">'+esc(d.title)+'</span></span></i><i class="bk">Trip journal</i></div>';
   var mob=mobileNow();rbook.style.setProperty("--prx",(mob?-3:-5)+"deg");rbook.style.setProperty("--pry",(mob?-7:-12)+"deg");
-  reader.hidden=false;document.querySelector("main").setAttribute("inert","");document.body.style.overflow="hidden";
+  reader.hidden=false;
+  /* the reader cover is a scaled copy of the shelf cover: same aspect, layout and text size relative to the cover */
+  var ff=a.querySelector(".f-front"),fr=rbook.querySelector(".rd-cover>i.fr");
+  if(ff&&fr&&ff.offsetWidth){var fw=ff.offsetWidth,fh=ff.offsetHeight;rbook.style.setProperty("--H","calc(var(--W) * "+(fh/fw).toFixed(4)+")");
+    var k=rbook.offsetWidth/fw;fr.className="fr copy";
+    fr.innerHTML='<span class="rd-face" style="width:'+fw+'px;height:'+fh+'px;transform:scale('+k.toFixed(4)+')">'+ff.innerHTML+'</span>';
+    [].forEach.call(fr.querySelectorAll("img"),function(im){im.loading="eager";});}
+  document.querySelector("main").setAttribute("inert","");document.body.style.overflow="hidden";
   build(true);
   function land(){Sound.play("land");state="open";rbook.classList.add("landed");var rl=rbook.querySelector(".read");if(rl)rl.focus({preventScroll:true});}
   dialog.focus({preventScroll:true});
@@ -654,10 +661,13 @@ function closeReader(){
   if(!reader||reader.hidden||state==="closing"||state==="closed")return;state="closing";clearTimers();
   var a=lastTrigger,li=curLi;
   function finish(){
-    var cv=rbook.querySelector(".rd-cover"),cr=cv&&cv.getBoundingClientRect();Sound.play("thud");if(li)li.classList.remove("away");if(a&&!reduce)handBack(a,cr);reader.hidden=true;rbook.innerHTML="";rbook.className="rd-book";flyEl.style.cssText="";
+    var cv=rbook.querySelector(".rd-cover"),cr=cv&&cv.getBoundingClientRect();Sound.play("thud");if(li)li.classList.remove("away");if(a&&!reduce)handBack(a,cr);
+    function cleanup(){reader.hidden=true;reader.style.pointerEvents="";rbook.innerHTML="";rbook.className="rd-book";rbook.style.opacity="";rbook.style.transition="";flyEl.style.cssText="";}
+    /* brief crossfade: the reader copy dissolves over the shelf book, which is already in the same pose */
+    if(reduce)cleanup();else{reader.style.pointerEvents="none";rbook.style.transition="opacity .16s linear";rbook.style.opacity="0";later(cleanup,180);}
     document.querySelector("main").removeAttribute("inert");document.body.style.overflow="";reader.classList.remove("on");
     if(a){a.setAttribute("aria-expanded","false");a.focus({preventScroll:true});}
-    state="closed";build(true);}
+    state="closed";if(reduce)build(true);else setTimeout(function(){build(true);},520);}
   if(reduce){finish();return;}
   var wasOpen=rbook.classList.contains("open");
   /* phase 1: cover and pages close */
