@@ -643,7 +643,7 @@ function handBack(a,cr){a.style.transition="none";a.style.transform=restPose(a);
   void a.offsetWidth;
   requestAnimationFrame(function(){a.style.transition="transform .42s cubic-bezier(.25,.7,.3,1)";a.style.transform="";
     setTimeout(function(){a.style.transition="";},460);});}
-function openReader(a){
+function openReader(a,instant){
   if(!reader||state!=="closed")return;state="opening";clearTimers();rbook.style.opacity="";rbook.style.transition="";reader.style.pointerEvents="";
   var li=a.closest("li");curLi=li;lastTrigger=a;a.setAttribute("aria-expanded","true");
   var d=li.dataset,cv=d.pal?' data-pal="'+esc(d.pal)+'"':"";
@@ -667,7 +667,7 @@ function openReader(a){
   build(true);
   function land(){Sound.play("land");state="open";rbook.classList.add("landed");var rl=rbook.querySelector(".read");if(rl)rl.focus({preventScroll:true});}
   dialog.focus({preventScroll:true});
-  if(reduce){li.classList.add("away");rbook.classList.add("open","up");reader.classList.add("on");land();return;}
+  if(reduce||instant){li.classList.add("away");rbook.classList.add("open","up");reader.classList.add("on");land();return;}
   /* phase 0: place the reader book exactly over the shelf book (no transition) */
   rbook.classList.add("pre");flyEl.style.transition="none";flyEl.style.transform=flipTransform(a);void flyEl.offsetWidth;
   li.classList.add("away");
@@ -705,22 +705,103 @@ if(reader){
       f[(i+(e.shiftKey?-1:1)+f.length)%f.length].focus();}});
 }
 
+
+/* ---------- soft navigation: "Read entry" grows the notebook page into the trip entry ----------
+   The homepage stays in the DOM (hidden) while an entry is shown, so Back restores it exactly, with the notebook reopened.
+   Real URLs via pushState; the entry pages remain plain static pages for deep links and no-JS. */
+var spa={cache:{},view:null,homeY:0,book:null,busy:false},homeMain=document.getElementById("main"),homeFoot=document.querySelector("body>footer");
+var canVT=!!document.startViewTransition;
+var ann=document.createElement("p");ann.className="sr";ann.setAttribute("aria-live","polite");ann.id="route-announcer";document.body.appendChild(ann);
+function say(t){ann.textContent="";setTimeout(function(){ann.textContent=t;},60);}
+function fetchEntry(href){var u=new URL(href,location.href).href;
+  if(!spa.cache[u])spa.cache[u]=fetch(u,{credentials:"same-origin"}).then(function(r){if(!r.ok)throw new Error(r.status);return r.text();})
+    .then(function(t){return new DOMParser().parseFromString(t,"text/html");}).catch(function(e){delete spa.cache[u];throw e;});
+  return spa.cache[u];}
+function homeURL(){return new URL(".",document.baseURI).href.replace(/trips\/[^\/]+\/$/,"");}
+var HOME=location.href.split("#")[0].split("?")[0];
+function closeInstant(){clearTimers();var a=lastTrigger;if(curLi)curLi.classList.remove("away");
+  reader.hidden=true;reader.classList.remove("on");reader.style.pointerEvents="";rbook.innerHTML="";rbook.className="rd-book";rbook.style.opacity="";rbook.style.transition="";flyEl.style.cssText="";
+  homeMain.removeAttribute("inert");document.body.style.overflow="";if(a){a.setAttribute("aria-expanded","false");a.style.transform="";a.style.transition="";}state="closed";}
+function setName(el,on){if(el)el.style.viewTransitionName=on&&!reduce?"entry-sheet":"";}
+function run(update,done){
+  if(canVT){var vt=document.startViewTransition(update);vt.finished.then(done,done);return;}
+  /* fallback: a paper sheet grows from the notebook page (or shrinks back), the swap happens under it */
+  if(reduce){update();done();return;}
+  update();var from=spa.sheetFrom;
+  if(!from||!from.width){done();return;}
+  var sh=document.createElement("div");sh.className="spa-sheet paper";document.body.appendChild(sh);
+  var W=innerWidth,H=innerHeight,k=[{clipPath:"inset("+from.top+"px "+(W-from.right)+"px "+(H-from.bottom)+"px "+from.left+"px)",opacity:1},{clipPath:"inset(0 0 0 0)",opacity:0}];
+  if(spa.dir==="back")k.reverse();
+  var an=sh.animate(k,{duration:520,easing:"cubic-bezier(.2,.8,.2,1)",fill:"forwards"});
+  an.onfinish=function(){sh.remove();done();};}
+function showEntry(doc,href,push,fromBook){
+  var main=doc.querySelector("main"),foot=doc.querySelector("body>footer");if(!main)throw new Error("no main");
+  var page=reader.hidden?null:rbook.querySelector(".rd-page");spa.sheetFrom=page?page.getBoundingClientRect():null;spa.dir="fwd";
+  setName(page,true);
+  run(function(){
+    setName(page,false);spa.homeY=scrollY;spa.book=fromBook?lastTrigger:null;
+    if(push)history.pushState({spa:"entry",href:href},"",href);
+    if(!reader.hidden)closeInstant();
+    /* main/footer from the entry page; relative URLs in it now resolve against the pushed URL */
+    var m=document.importNode(main,true),f=foot?document.importNode(foot,true):null;
+    homeMain.hidden=true;homeMain.id="home-main";if(homeFoot)homeFoot.hidden=true;
+    m.id="main";m.classList.add("spa-entry");homeMain.after(m);if(f){f.classList.add("spa-entry");(homeFoot||m).after(f);}
+    spa.view=[m,f];document.title=doc.title;
+    var art=m.querySelector("article.entry");setName(art,true);
+    window.scrollTo({top:0,left:0,behavior:"instant"});
+    build();kick();if(window.__photos)window.__photos(m);
+    var h=m.querySelector("h1");if(h){h.setAttribute("tabindex","-1");h.focus({preventScroll:true});}
+  },function(){var art=spa.view&&spa.view[0].querySelector("article.entry");setName(art,false);spa.busy=false;say("Trip entry: "+doc.title.split(" · ")[0]);});}
+function showHome(hash){
+  if(!spa.view)return;var v=spa.view,art=v[0].querySelector("article.entry"),b=spa.book;
+  spa.sheetFrom=null;spa.dir="back";setName(art,!!b);
+  run(function(){
+    setName(art,false);v.forEach(function(x){if(x)x.remove();});spa.view=null;
+    homeMain.id="main";homeMain.hidden=false;if(homeFoot)homeFoot.hidden=false;document.title=spa.homeTitle;
+    build();kick();
+    if(hash){var t=document.getElementById(hash.slice(1));if(t){t.scrollIntoView({behavior:"instant"});}spa.book=null;return;}
+    window.scrollTo({top:spa.homeY,left:0,behavior:"instant"});
+    if(b){openReader(b,true);var pg=rbook.querySelector(".rd-page");setName(pg,true);spa.sheetFrom=pg&&pg.getBoundingClientRect();}
+    else homeMain.focus&&homeMain.setAttribute("tabindex","-1"),homeMain.focus({preventScroll:true});
+  },function(){var pg=rbook.querySelector(".rd-page");setName(pg,false);spa.busy=false;say(b?"Home. Journal reopened.":"Home");});}
+spa.homeTitle=document.title;
+if(reader&&history.pushState&&window.fetch&&window.DOMParser){
+  history.replaceState({spa:"home"},"");try{history.scrollRestoration="manual";}catch(e){}
+  /* prefetch when a notebook lands, so the jump is instant */
+  new MutationObserver(function(){if(rbook.classList.contains("landed")){var r=rbook.querySelector(".read");if(r)fetchEntry(r.getAttribute("href")).catch(function(){});}}).observe(rbook,{attributes:true,attributeFilter:["class"]});
+  reader.addEventListener("click",function(e){var r=e.target.closest&&e.target.closest("a.read");if(!r||e.defaultPrevented||e.button>0||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;
+    e.preventDefault();if(spa.busy)return;spa.busy=true;var href=new URL(r.getAttribute("href"),location.href).href;
+    fetchEntry(href).then(function(doc){showEntry(doc,href,true,true);}).catch(function(){location.href=href;});});
+  /* links inside the soft entry that point at the homepage go back softly */
+  document.addEventListener("click",function(e){if(!spa.view||e.defaultPrevented||e.button>0||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;
+    var a=e.target.closest&&e.target.closest("a[href]");if(!a)return;var hr=a.getAttribute("href"),u=new URL(hr,hr.charAt(0)==="#"?HOME:location.href);
+    if(u.origin+u.pathname!==HOME)return;e.preventDefault();
+    if(history.state&&history.state.spa==="entry"){spa.pendingHash=u.hash||null;spa.book=u.hash?null:spa.book;history.back();}
+    else{history.pushState({spa:"home"},"",u.href);showHome(u.hash);}});
+  window.addEventListener("popstate",function(e){var st=e.state||{};
+    if(st.spa==="entry"&&!spa.view){spa.busy=true;fetchEntry(st.href).then(function(doc){showEntry(doc,st.href,false,false);}).catch(function(){location.reload();});}
+    else if(st.spa!=="entry"&&spa.view){var h=spa.pendingHash||(location.hash||null);spa.pendingHash=null;showHome(h);}});
+}
+
 })();
 
 /* ---------- photo figures: dithered by default, "develops" to colour; click for lightbox ---------- */
 (function(){
-  var figs=document.querySelectorAll("figure.photo");if(!figs.length)return;
-  var lb=document.createElement("div");lb.className="lightbox";lb.hidden=true;lb.setAttribute("role","dialog");lb.setAttribute("aria-modal","true");lb.setAttribute("aria-label","Photo viewer");
-  lb.innerHTML='<div class="lb-inner" tabindex="-1"><img alt=""><p class="lb-cap"></p><button type="button" class="btn lb-close">close ×</button></div>';
-  document.body.appendChild(lb);
-  var img=lb.querySelector("img"),cap=lb.querySelector(".lb-cap"),btn=lb.querySelector(".lb-close"),back=null;
+  var lb=null,img,cap,btn,back=null;
+  function mainEl(){return document.getElementById("main");}
+  function setup(){if(lb)return;
+    lb=document.createElement("div");lb.className="lightbox";lb.hidden=true;lb.setAttribute("role","dialog");lb.setAttribute("aria-modal","true");lb.setAttribute("aria-label","Photo viewer");
+    lb.innerHTML='<div class="lb-inner" tabindex="-1"><img alt=""><p class="lb-cap"></p><button type="button" class="btn lb-close">close ×</button></div>';
+    document.body.appendChild(lb);
+    img=lb.querySelector("img");cap=lb.querySelector(".lb-cap");btn=lb.querySelector(".lb-close");
+    lb.addEventListener("click",function(e){if(e.target===lb||e.target===btn)close();});
+    document.addEventListener("keydown",function(e){if(lb.hidden)return;if(e.key==="Escape"){e.preventDefault();close();}
+      if(e.key==="Tab"){e.preventDefault();btn.focus();}});}
   function open(fig){back=fig.querySelector(".ph-btn");img.src=fig.dataset.full;img.alt=fig.querySelector("img.d").alt;cap.textContent=fig.querySelector("figcaption").textContent;
-    Sound.play("lbopen");lb.hidden=false;document.body.style.overflow="hidden";document.querySelector("main").setAttribute("inert","");btn.focus({preventScroll:true});}
-  function close(){if(lb.hidden)return;Sound.play("lbclose");lb.hidden=true;img.removeAttribute("src");document.body.style.overflow="";document.querySelector("main").removeAttribute("inert");if(back)back.focus({preventScroll:true});}
-  lb.addEventListener("click",function(e){if(e.target===lb||e.target===btn)close();});
-  document.addEventListener("keydown",function(e){if(lb.hidden)return;if(e.key==="Escape"){e.preventDefault();close();}
-    if(e.key==="Tab"){e.preventDefault();btn.focus();}});
-  figs.forEach(function(f){var b=f.querySelector(".ph-btn");
-    b.addEventListener("click",function(){
-      open(f);});});
+    Sound.play("lbopen");lb.hidden=false;document.body.style.overflow="hidden";mainEl().setAttribute("inert","");btn.focus({preventScroll:true});}
+  function close(){if(lb.hidden)return;Sound.play("lbclose");lb.hidden=true;img.removeAttribute("src");document.body.style.overflow="";mainEl().removeAttribute("inert");if(back)back.focus({preventScroll:true});}
+  /* callable again after a soft navigation inserts an entry */
+  window.__photos=function(scope){var figs=(scope||document).querySelectorAll("figure.photo");if(!figs.length)return;setup();
+    figs.forEach(function(f){var b=f.querySelector(".ph-btn");if(!b||b._lb)return;b._lb=1;b.addEventListener("click",function(){open(f);});});};
+  window.__photos(document);
 })();
