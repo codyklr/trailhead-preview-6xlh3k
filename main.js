@@ -678,6 +678,7 @@ function openReader(a,instant){
 }
 function closeReader(){
   if(!reader||reader.hidden||state==="closing"||state==="closed")return;state="closing";clearTimers();
+  try{if(history.state&&history.state.spa==="home"&&history.state.book!=null)history.replaceState({spa:"home"},"");}catch(e){}
   var a=lastTrigger,li=curLi;
   function finish(){
     var cv=rbook.querySelector(".rd-cover"),cr=cv&&cv.getBoundingClientRect();Sound.play("thud");if(li)li.classList.remove("away");if(a&&!reduce)handBack(a,cr);
@@ -724,6 +725,7 @@ function closeInstant(){clearTimers();var a=lastTrigger;if(curLi)curLi.classList
   homeMain.removeAttribute("inert");document.body.style.overflow="";if(a){a.setAttribute("aria-expanded","false");a.style.transform="";a.style.transition="";}state="closed";}
 function setName(el,on){if(el)el.style.viewTransitionName=on&&!reduce?"entry-sheet":"";}
 function run(update,done){
+  if(spa.uaAnim){spa.uaAnim=false;update();done();return;}
   if(canVT){var vt=document.startViewTransition(update);vt.finished.then(done,done);return;}
   /* fallback: a paper sheet grows from the notebook page (or shrinks back), the swap happens under it */
   if(reduce){update();done();return;}
@@ -740,7 +742,7 @@ function showEntry(doc,href,push,fromBook){
   setName(page,true);
   run(function(){
     setName(page,false);spa.homeY=scrollY;spa.book=fromBook?lastTrigger:null;
-    if(push)history.pushState({spa:"entry",href:href},"",href);
+    if(push){try{history.replaceState({spa:"home",book:bookIndex(spa.book),y:spa.homeY},"");}catch(e){}history.pushState({spa:"entry",href:href},"",href);}
     if(!reader.hidden)closeInstant();
     /* main/footer from the entry page; relative URLs in it now resolve against the pushed URL */
     var m=document.importNode(main,true),f=foot?document.importNode(foot,true):null;
@@ -765,8 +767,23 @@ function showHome(hash){
     else homeMain.focus&&homeMain.setAttribute("tabindex","-1"),homeMain.focus({preventScroll:true});
   },function(){var pg=rbook.querySelector(".rd-page");setName(pg,false);requestAnimationFrame(function(){requestAnimationFrame(function(){reader.classList.remove("instant");});});spa.busy=false;say(b?"Home. Journal reopened.":"Home");});}
 spa.homeTitle=document.title;
+function bookIndex(a){var all=shelf?[].slice.call(shelf.querySelectorAll(".book")):[];var i=all.indexOf(a);return i<0?null:i;}
+/* Back that arrives as a real page load (WebKit evicted the page, the entry was reloaded, or opened from elsewhere):
+   the home history entry remembers which notebook was open and where, so restore it already open */
+function restoreFromState(){var st=history.state;if(!st||st.spa!=="home"||st.book==null||spa.view||!reader||!reader.hidden)return;
+  var a=shelf&&shelf.querySelectorAll(".book")[st.book];if(!a)return;
+  if(st.y!=null)window.scrollTo({top:st.y,left:0,behavior:"instant"});
+  reader.classList.add("instant");openReader(a,true);void rbook.offsetWidth;
+  requestAnimationFrame(function(){requestAnimationFrame(function(){reader.classList.remove("instant");});});say("Journal reopened.");}
+/* a page that is not the homepage owns no soft-nav states. WebKit can deliver Back to the homepage entry as a
+   same-document popstate here (after the entry was reloaded), changing the URL but not the page: load it for real */
+if(!reader){var DOC_PATH=location.pathname;window.addEventListener("popstate",function(){if(location.pathname!==DOC_PATH)location.reload();});}
 if(reader&&history.pushState&&window.fetch&&window.DOMParser){
-  history.replaceState({spa:"home"},"");try{history.scrollRestoration="manual";}catch(e){}
+  if(!(history.state&&history.state.spa==="home"))history.replaceState({spa:"home"},"");try{history.scrollRestoration="manual";}catch(e){}
+  if(document.readyState==="complete")setTimeout(restoreFromState,0);else window.addEventListener("load",function(){setTimeout(restoreFromState,0);});
+  window.addEventListener("pageshow",function(e){if(!e.persisted)return;
+    /* bfcache: if we come back to a page that still shows a soft entry but the URL is home, go home without animation */
+    if(spa.view&&!(history.state&&history.state.spa==="entry")){spa.uaAnim=true;showHome(null);}else restoreFromState();});
   /* prefetch when a notebook lands, so the jump is instant */
   new MutationObserver(function(){if(rbook.classList.contains("landed")){var r=rbook.querySelector(".read");if(r)fetchEntry(r.getAttribute("href")).catch(function(){});}}).observe(rbook,{attributes:true,attributeFilter:["class"]});
   reader.addEventListener("click",function(e){var r=e.target.closest&&e.target.closest("a.read");if(!r||e.defaultPrevented||e.button>0||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;
@@ -780,7 +797,7 @@ if(reader&&history.pushState&&window.fetch&&window.DOMParser){
     if(a.hasAttribute("data-soft-back")&&history.state&&history.state.spa==="entry"&&spa.book){spa.pendingHash=null;history.back();return;}
     if(history.state&&history.state.spa==="entry"){spa.pendingHash=u.hash||null;spa.book=u.hash?null:spa.book;history.back();}
     else{history.pushState({spa:"home"},"",u.href);showHome(u.hash);}});
-  window.addEventListener("popstate",function(e){var st=e.state||{};
+  window.addEventListener("popstate",function(e){var st=e.state||{};spa.uaAnim=!!e.hasUAVisualTransition;
     if(st.spa==="entry"&&!spa.view){spa.busy=true;fetchEntry(st.href).then(function(doc){showEntry(doc,st.href,false,false);}).catch(function(){location.reload();});}
     else if(st.spa!=="entry"&&spa.view){var h=spa.pendingHash!==undefined?spa.pendingHash:(spa.book?null:(location.hash||null));spa.pendingHash=undefined;showHome(h);}});
 }
