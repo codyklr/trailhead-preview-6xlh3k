@@ -3,7 +3,7 @@
 <head>
 <meta name="robots" content="noindex,nofollow"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <link rel="preload" href="assets/fonts/instrument-serif-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="assets/fonts/atkinson-hyperlegible-next-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="styles.css?v=cb5ccc66">
+<link rel="stylesheet" href="styles.css?v=9c052ea9">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 fill=%27%2316201b%27/%3E%3Cpath d=%27M3 26 11 10l5 8 4-6 9 14z%27 fill=%27%23c4572a%27/%3E%3C/svg%3E">
 <title>Cody Keller</title>
 <meta name="description" content="Cody Keller: portfolio and trip journals.">
@@ -19,38 +19,52 @@
 <svg id="contours" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true"></svg>
 <header class="bar"><div class="wrap">
   <a class="brand" href="#top" aria-label="Home">cody</a>
-  <nav aria-label="Primary"><a href="#about">about</a><a href="#work">work</a><a href="#journal">trip journals</a><a href="#map">map</a></nav>
+  <nav aria-label="Primary"><a href="#about"><i>01</i>about</a><a href="#projects"><i>02</i>projects</a><a href="#employment"><i>03</i>employment</a><a href="#trips"><i>04</i>trips</a><a href="#map"><i>05</i>map</a></nav>
   <span class="tools"><button class="btn snd" id="snd" type="button" aria-label="Sound" aria-pressed="false"><svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" shape-rendering="crispEdges" aria-hidden="true"><path d="M2 6h3l4-3v10l-4-3H2z"/><g class="s-on"><path d="M11 6h1v4h-1zM13 4h1v8h-1z"/></g><g class="s-off"><path d="M11 6h1v1h-1zM12 7h1v1h-1zM13 8h1v1h-1zM14 9h1v1h-1zM14 6h1v1h-1zM13 7h-1v1h1zM12 8h-1v1h1zM11 9h1v1h-1z"/></g></svg></button><button class="btn" id="theme" aria-pressed="false">☀ day hike</button></span>
 </div></header>
 <main id="main">
-<section class="hero wrap" id="top">
-  <div class="frame">
-    <div class="chrome"><span class="dots" aria-hidden="true"><b></b><b></b><b></b></span></div>
-    <canvas class="pix" id="hero-canvas" data-scene="hero" data-seed="3" width="400" height="190" role="img" aria-label="Dithered illustration of mountain ridges with fog and a rising sun"></canvas>
-  </div>
-  <div class="hero-text">
-    <h1>Cody Keller</h1>
-    <p class="tag">One-line tagline goes here.<span class="ph">PLACEHOLDER</span></p>
-    <p class="status"><span id="status-text" aria-hidden="true">somewhere above treeline [placeholder]</span><span class="sr" id="status-sr">somewhere above treeline [placeholder]</span><span class="cur" aria-hidden="true"></span></p>
+<section class="hero wrap" id="top" aria-label="Introduction">
+  <p class="mast" aria-hidden="true"><span>29.76° N · 95.37° W</span></p>
+  <div class="cover">
+      <h1><span>Cody</span> <span>Keller</span></h1>
+      <p class="tag">I build tools.</p>
+      <ul class="log" aria-label="Field notes">
+        <li><span>home</span><span>Houston, TX</span></li>
+        <li><span>latest trip</span><span><a href="trips/acadia-2026-10/">Acadia, October 2026</a> <span class="via">NYC · Boston · Acadia</span></span></li>
+      </ul>
+      <div class="toc" role="navigation" aria-label="Contents"><ol>
+        <li><a href="#about"><span>01</span>About</a></li>
+        <li><a href="#projects"><span>02</span>Projects</a></li>
+        <li><a href="#employment"><span>03</span>Employment</a></li>
+        <li><a href="#trips"><span>04</span>Trips</a></li>
+        <li><a href="#map"><span>05</span>Map</a></li>
+      </ol></div>
+    <figure class="plate">
+      <div class="frame win">
+        <div class="chrome" aria-hidden="true"><span class="dots"><b></b><b></b><b></b></span><span>view</span></div>
+        <canvas class="pix" id="hero-canvas" data-scene="hero" data-seed="3" data-mratio=".3" width="300" height="240" aria-hidden="true"></canvas>
+      </div>
+    </figure>
   </div>
 </section>
 
 <section class="wrap" id="about">
-  <p class="eyebrow">01</p><h2>About</h2>
+  <div class="shead"><p class="eyebrow"><span>01</span><span>profile</span></p><h2>About</h2></div>
   <div class="about">
     <div>
       <p>Placeholder paragraph about who Cody is.<span class="ph">PLACEHOLDER</span></p>
       <p>Placeholder paragraph about the outdoors.<span class="ph">PLACEHOLDER</span></p>
     </div>
     <ul class="facts" aria-label="Quick facts">
-      <li><span>base</span><span>[placeholder]</span></li><li><span>works on</span><span>[placeholder]</span></li>
-      <li><span>favorite trail</span><span>[placeholder]</span></li><li><span>pack weight</span><span>[placeholder]</span></li>
+      <li class="rec" aria-hidden="true"><span>field record</span><span>no. 001</span></li>
+      <li><span>home</span><span>Houston, TX</span></li><li><span>works on</span><span>[placeholder]</span></li>
+      <li><span>journals</span><span>3</span></li><li><span>places pinned</span><span>3</span></li>
     </ul>
   </div>
 </section>
 
-<section class="wrap" id="work">
-  <p class="eyebrow">02</p><h2>Work</h2>
+<section class="wrap" id="projects">
+  <div class="shead"><p class="eyebrow"><span>02</span><span>catalogue of tools</span></p><h2>Projects</h2><p class="snote">things I have built and shipped</p></div>
   <div class="grid">
     <article class="card"><canvas class="pix" data-scene="thumb" data-seed="11" data-variant="grid" width="200" height="110" aria-hidden="true"></canvas>
       <div class="body"><h3>Workday Jobs Scraper</h3>
@@ -67,8 +81,16 @@
   </div>
 </section>
 
-<section class="wrap atlas" id="journal">
-  <p class="eyebrow">03</p><h2>Trip Journals</h2>
+<section class="wrap" id="employment">
+  <div class="shead"><p class="eyebrow"><span>03</span><span>record of work</span></p><h2>Employment</h2></div>
+  <ol class="jobs">
+    <li><span class="jd">[dates]</span><span class="jr">Role<span class="ph">PLACEHOLDER</span></span><span class="jc">Company</span></li>
+    <li><span class="jd">[dates]</span><span class="jr">Role<span class="ph">PLACEHOLDER</span></span><span class="jc">Company</span></li>
+  </ol>
+</section>
+
+<section class="wrap atlas" id="trips">
+  <div class="shead"><p class="eyebrow"><span>04</span><span>atlas</span></p><h2>Trips</h2><p class="snote">pick a notebook, or turn the globe</p></div>
   <div class="atlas-grid">
   <div class="globe-ui atlas-map">
     <div class="gcol" id="map">
@@ -83,9 +105,9 @@
         <p class="gstrip" aria-hidden="true"><i></i></p>
         <div class="ghint" id="ghint" aria-hidden="true"><svg viewBox="0 0 40 16" width="40" height="16" fill="currentColor" shape-rendering="crispEdges"><path d="M0 8l7-6v4h8v4H7v4zM40 8l-7-6v4h-8v4h8v4z"/><rect x="18" y="5" width="4" height="6"/></svg></div>
       </div>
+      <p class="figcap" aria-hidden="true"><span>fig. 02</span><span>places visited</span></p>
       <div class="gctl" role="group" aria-label="Globe controls">
         <button class="btn" type="button" id="g-home">Home</button>
-        <button class="btn" type="button" id="g-ne">Northeast</button>
         <button class="btn" type="button" id="g-in" aria-label="Zoom in">+</button>
         <button class="btn" type="button" id="g-out" aria-label="Zoom out">&minus;</button>
         <button class="btn" type="button" id="g-spin" aria-pressed="false">Pause spin</button>
@@ -98,23 +120,23 @@
       <ul class="gl" id="glist"></ul>
     </div>
   </div>
-  <ul class="shelf fade" id="shelf" tabindex="0" aria-label="Trip journals">
-    <li style="--r:-3deg;--dy:0px" data-title="Acadia, October 2026" data-date="Oct 3–10, 2026" data-stats="" data-blurb="Fall color on the carriage roads and pond trails. A bike, a few short hikes, and a lot of stopping to look." data-href="trips/acadia-2026-10/" data-photo="assets/photos/acadia-pond-cover.png?v=cb5ccc66">
+  <ul class="shelf fade" id="shelf" tabindex="0" aria-label="Trips">
+    <li style="--r:-3deg;--dy:0px" data-title="Acadia, October 2026" data-date="Oct 3–10, 2026" data-stats="" data-blurb="Fall color on the carriage roads and pond trails. A bike, a few short hikes, and a lot of stopping to look." data-href="trips/acadia-2026-10/" data-photo="assets/photos/acadia-pond-cover.png?v=9c052ea9" data-place="Acadia (Bar Harbor), ME" data-coord="44.39° N · 68.20° W">
       <a class="book" href="trips/acadia-2026-10/"><span class="shadow" aria-hidden="true"></span>
         <span class="f f-back" aria-hidden="true"></span><span class="f f-left" aria-hidden="true"></span><span class="f f-right" aria-hidden="true"></span><span class="f f-top" aria-hidden="true"></span><span class="f f-bottom" aria-hidden="true"></span>
-        <span class="f f-front"><picture><source media="(max-width:720px)" srcset="assets/photos/acadia-pond-cover-s.png?v=cb5ccc66"><img class="pix" src="assets/photos/acadia-pond-cover.png?v=cb5ccc66" width="80" height="83" alt="" loading="lazy" aria-hidden="true"></picture>
+        <span class="f f-front"><picture><source media="(max-width:720px)" srcset="assets/photos/acadia-pond-cover-s.png?v=9c052ea9"><img class="pix" src="assets/photos/acadia-pond-cover.png?v=9c052ea9" width="80" height="83" alt="" loading="lazy" aria-hidden="true"></picture>
           <span class="cap"><span class="dt">Oct 3–10, 2026</span><span class="ti">Acadia, October 2026</span><span class="st"></span></span></span>
       </a></li>
-    <li style="--r:2.4deg;--dy:22px" data-title="NYC, October 2026" data-date="Oct 2026" data-stats="" data-blurb="Out to the harbor for Lady Liberty, then a long afternoon at the museum." data-href="trips/nyc-2026-10/" data-photo="assets/photos/statue-of-liberty-cover.png?v=cb5ccc66">
+    <li style="--r:2.4deg;--dy:22px" data-title="NYC, October 2026" data-date="Oct 2026" data-stats="" data-blurb="Out to the harbor for Lady Liberty, then a long afternoon at the museum." data-href="trips/nyc-2026-10/" data-photo="assets/photos/statue-of-liberty-cover.png?v=9c052ea9" data-place="New York City, NY" data-coord="40.71° N · 74.01° W">
       <a class="book" href="trips/nyc-2026-10/"><span class="shadow" aria-hidden="true"></span>
         <span class="f f-back" aria-hidden="true"></span><span class="f f-left" aria-hidden="true"></span><span class="f f-right" aria-hidden="true"></span><span class="f f-top" aria-hidden="true"></span><span class="f f-bottom" aria-hidden="true"></span>
-        <span class="f f-front"><picture><source media="(max-width:720px)" srcset="assets/photos/statue-of-liberty-cover-s.png?v=cb5ccc66"><img class="pix" src="assets/photos/statue-of-liberty-cover.png?v=cb5ccc66" width="80" height="83" alt="" loading="lazy" aria-hidden="true"></picture>
+        <span class="f f-front"><picture><source media="(max-width:720px)" srcset="assets/photos/statue-of-liberty-cover-s.png?v=9c052ea9"><img class="pix" src="assets/photos/statue-of-liberty-cover.png?v=9c052ea9" width="80" height="83" alt="" loading="lazy" aria-hidden="true"></picture>
           <span class="cap"><span class="dt">Oct 2026</span><span class="ti">NYC, October 2026</span><span class="st"></span></span></span>
       </a></li>
-    <li style="--r:-1.4deg;--dy:-8px" data-title="The Met, armor hall" data-date="Oct 2026" data-stats="" data-blurb="A suit of armor behind glass, big enough to make you rethink the Middle Ages. A short stop on the NYC leg." data-href="trips/met-armor-2026-10/" data-photo="assets/photos/met-armor-cover.png?v=cb5ccc66">
+    <li style="--r:-1.4deg;--dy:-8px" data-title="The Met, armor hall" data-date="Oct 2026" data-stats="" data-blurb="A suit of armor behind glass, big enough to make you rethink the Middle Ages. A short stop on the NYC leg." data-href="trips/met-armor-2026-10/" data-photo="assets/photos/met-armor-cover.png?v=9c052ea9" data-place="New York City, NY" data-coord="40.71° N · 74.01° W">
       <a class="book" href="trips/met-armor-2026-10/"><span class="shadow" aria-hidden="true"></span>
         <span class="f f-back" aria-hidden="true"></span><span class="f f-left" aria-hidden="true"></span><span class="f f-right" aria-hidden="true"></span><span class="f f-top" aria-hidden="true"></span><span class="f f-bottom" aria-hidden="true"></span>
-        <span class="f f-front"><picture><source media="(max-width:720px)" srcset="assets/photos/met-armor-cover-s.png?v=cb5ccc66"><img class="pix" src="assets/photos/met-armor-cover.png?v=cb5ccc66" width="80" height="83" alt="" loading="lazy" aria-hidden="true"></picture>
+        <span class="f f-front"><picture><source media="(max-width:720px)" srcset="assets/photos/met-armor-cover-s.png?v=9c052ea9"><img class="pix" src="assets/photos/met-armor-cover.png?v=9c052ea9" width="80" height="83" alt="" loading="lazy" aria-hidden="true"></picture>
           <span class="cap"><span class="dt">Oct 2026</span><span class="ti">The Met, armor hall</span><span class="st"></span></span></span>
       </a></li>
   </ul>
@@ -123,6 +145,7 @@
 </main>
 <footer><div class="wrap">
   <a href="#">GitHub <span class="ph">PLACEHOLDER</span></a><a href="#">X <span class="ph">PLACEHOLDER</span></a><a href="#">email <span class="ph">PLACEHOLDER</span></a>
+  <p class="colophon">Set in Instrument Serif, Atkinson Hyperlegible Next, Geist Mono and Departure Mono. Dithered in the browser, no trackers.</p>
   <span class="cairn" aria-hidden="true">▲ ▲▲ ▲▲▲</span></div></footer>
 <div class="reader" id="reader" hidden>
   <div class="rd-scrim" data-close></div>
@@ -131,5 +154,5 @@
     <button class="btn rd-close" type="button" data-close>close ✕ <span class="sr">(Esc)</span></button>
   </div>
 </div>
-<script src="main.js?v=cb5ccc66"></script>
+<script src="main.js?v=9c052ea9"></script>
 </body></html>

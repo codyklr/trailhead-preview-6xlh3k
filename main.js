@@ -78,8 +78,7 @@ var R={
   themeNight:function(){return phrase(["A3","E3"],72,.4,7,2,3000);},
   tl:function(){return phrase(["A5"],22,.7,6,2,3200);},
   lbopen:function(){return phrase(["A4","E5"],64,.4,7,2,3000);},
-  lbclose:function(){return phrase(["E5","A4"],64,.4,7,2,3000);},
-  tick:function(){return flutter(41,1,14,0,4200,2600,5,3);}
+  lbclose:function(){return phrase(["E5","A4"],64,.4,7,2,3000);}
 };
 for(var q=0;q<5;q++)(function(n){R["pin"+n]=function(){return phrase([PENT[n]],72,.55,7,2,3000);};})(q);
 return {SR:SR,render:function(n){return R[n]();},names:Object.keys(R),scale:N};
@@ -93,8 +92,8 @@ var on=false,ctx=null,master=null,sfx=null,ui=null,cache={},armed=false,voices=0
 try{on=localStorage.getItem("sound")==="on";}catch(e){}
 /* motion-linked sounds are skipped when the animation itself is skipped */
 var MOTION={hover:1,pickup:1,cover:1,flip:1,land:1,close:1,down:1,thud:1};
-/* relative loudness (linear gain on peak-normalised buffers). hierarchy: thud > close > cover > pickup/flip > land/theme > pin/lightbox > timeline > hover > tick */
-var LV={thud:.45,close:.3,cover:.27,pickup:.14,down:.12,flip:.15,land:.1,theme:.09,pin:.08,lbopen:.07,lbclose:.07,tl:.045,hover:.03,tick:.02};
+/* relative loudness (linear gain on peak-normalised buffers). hierarchy: thud > close > cover > pickup/flip > land/theme > pin/lightbox > timeline > hover */
+var LV={thud:.45,close:.3,cover:.27,pickup:.14,down:.12,flip:.15,land:.1,theme:.09,pin:.08,lbopen:.07,lbclose:.07,tl:.045,hover:.03};
 function jit(a){return 1+(Math.random()*2-1)*a;}
 function init(){
   if(ctx)return true;var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return false;
@@ -122,7 +121,7 @@ function play(name,arg){
     case"thud":fire("thud",v,jit(.02));duck(.5,.4);break;
     case"theme":fire(arg?"themeNight":"themeDay",v,1,ui);break;
     case"pin":fire("pin"+((arg|0)%5),v,1,ui);break;
-    case"tl":case"lbopen":case"lbclose":case"tick":fire(name,v,name==="tl"?jit(.02):1,ui);break;
+    case"tl":case"lbopen":case"lbclose":fire(name,v,name==="tl"?jit(.02):1,ui);break;
     default:fire(name,v,jit(.03));}}
 /* gesture plumbing: a remembered "on" still waits for the first real gesture */
 function wake(){
@@ -142,7 +141,7 @@ function bind(btn){
 return {bind:bind,play:play,synth:Synth,levels:LV,get on(){return on;},get ctx(){return ctx;}};
 })();
 
-/* codyklr.com concept — no deps, no modules (works from file://) */
+/* codyklr.com concept: no deps, no modules (works from file://) */
 (function(){
 "use strict";
 var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -172,6 +171,18 @@ function paint(ctx,idx,w,h,pal){var img=ctx.createImageData(w,h),d=img.data;
   for(var i=0;i<idx.length;i++){var c=pal[idx[i]];d[i*4]=c[0];d[i*4+1]=c[1];d[i*4+2]=c[2];d[i*4+3]=255;}ctx.putImageData(img,0,0);}
 
 /* ---------- scene: sun, ridges, fog -> scalar field in [0,1] ---------- */
+/* glyph mask at dither resolution: 1 = glyph, 2 = 1px ring, 0 = scene. Departure Mono at an 11px multiple stays crisp */
+function nameMask(txt,w,h){
+  var c=document.createElement("canvas");c.width=w;c.height=h;var x=c.getContext("2d");if(!x)return null;
+  var k=Math.max(1,Math.floor(h*.5/11)),fs;
+  for(;k>=1;k--){fs=11*k;x.font=fs+'px "Departure Mono",monospace';if(x.measureText(txt).width<=w*.92)break;}
+  if(k<1){fs=11;x.font=fs+'px "Departure Mono",monospace';}
+  x.textBaseline="alphabetic";x.fillStyle="#000";var px=Math.round(Math.max(3,w*.045)),py=Math.round(h*.5+fs*.36);
+  x.fillText(txt,px,py);var d=x.getImageData(0,0,w,h).data,m=new Uint8Array(w*h),i,X,Y;
+  for(i=0;i<w*h;i++)if(d[i*4+3]>127)m[i]=1;
+  for(Y=0;Y<h;Y++)for(X=0;X<w;X++){i=Y*w+X;if(m[i])continue;
+    if((X>0&&m[i-1]===1)||(X<w-1&&m[i+1]===1)||(Y>0&&m[i-w]===1)||(Y<h-1&&m[i+w]===1))m[i]=2;}
+  return m;}
 function Scene(canvas,o){
   var w=canvas.width,h=canvas.height,self=this;
   var seed=o.seed||1,layers=o.layers||4,night=!!o.night;
@@ -196,7 +207,15 @@ function Scene(canvas,o){
       var fa=Math.max(0,fg-.42)*1.6*band;
       v+=(.88-v)*Math.min(.5,fa);
       f[y*w+x]=v;}
+    if(o.name)self.engrave(f);
   };
+  /* name encoded in the dither: glyph pixels pin the field to the top of the ramp (lightest scene colour) and a
+     1px ring pins it to the bottom (darkest), so the name reads on sky, sun, ridge and fog in both themes while it
+     stays inside the same 4-colour Bayer texture; the fog drifts around it */
+  this.mask=null;
+  this.engrave=function(f){
+    var m=self.mask;if(!m){m=self.mask=nameMask(o.name,w,h);}if(!m)return;
+    for(var i=0;i<w*h;i++){var k=m[i];if(!k)continue;f[i]=k===1?1:0;}};
   this.draw=function(t,pal,night2){
     self.compute(t,night2);
     Dither.ordered(self.field,w,h,4,self.idx);
@@ -225,12 +244,12 @@ function isNight(){return root.getAttribute("data-theme")==="dark";}
 function fit(c,availOverride){
   if(!c._bw){c._bw=c.width;c._bh=c.height;}
   c.style.width="";var bd=c.offsetWidth-c.clientWidth,avail=(availOverride||c.parentElement.clientWidth||c._bw*3)-bd;
-  var s=Dither.dp(),w=Math.max(40,Math.floor(avail/s)),h=Math.round(w*c._bh/c._bw);
+  var s=Dither.dp(),w=Math.max(40,Math.floor(avail/s)),mr=s<3&&c.getAttribute("data-mratio"),h=Math.round(mr?w*+mr:w*c._bh/c._bw);
   if(c.width!==w)c.width=w; if(c.height!==h)c.height=h;
   c.style.width=(w*s+bd)+"px";c.style.maxWidth="100%";}
 function makeEntry(c){
   var kind=c.getAttribute("data-scene"),o={seed:+c.getAttribute("data-seed")||1},v=c.getAttribute("data-variant");
-  if(kind==="hero"){o.layers=4;o.sunX=.7;o.sunY=.33;o.sunR=.085;}
+  if(kind==="hero"){o.layers=4;o.sunX=.72;o.sunY=.3;o.sunR=.1;o.name=c.getAttribute("data-name");}
   else if(kind==="banner"){o.layers=3;o.sunX=.3;o.sunY=.38;o.sunR=.09;}
   else if(v&&v!=="ridge")return {c:c,s:thumbVariant(c,v,o.seed),kind:"thumb",pal:c.getAttribute("data-pal")};
   else {o.layers=v==="ridge"?5:2+(o.seed%3);o.sunX=.2+((o.seed*37)%60)/100;o.sunY=.35+((o.seed*13)%25)/100;o.sunR=.1;}
@@ -310,7 +329,7 @@ function bil(m,u,v,wrap){var x=u*m.w-.5,y=v*m.h-.5,x0=Math.floor(x),y0=Math.floo
 function gSize(){var cs=getComputedStyle(gframe),cw=gframe.clientWidth-(parseFloat(cs.paddingLeft)||0)-(parseFloat(cs.paddingRight)||0);if(!cw)return false;var S=Dither.dp(),N=Math.floor(cw/S);if(N!==G.N||S!==G.S){G.N=N;G.S=S;G.R=N/2-6;gcv.width=N;gcv.height=N;gcv.style.width=gcv.style.height="";gwrap.style.width=gwrap.style.height=(N*S)+"px";gAlloc();}return true;}
 function gAlloc(){var N=G.N,t=gcv;if(G.gl){gov.width=N;gov.height=N;t=gov;}G.img=t.getContext("2d").createImageData(N,N);G.u32=new Uint32Array(G.img.data.buffer);
   G.stars=[];for(var y=0;y<N;y++)for(var x=0;x<N;x++)if(((x*73856093^y*19349663)>>>0)%520===0)G.stars.push(x,y);}
-function gRender(){if(!G.land||!G.d||!gSize())return;gTheme();if(G.gl)gRenderGL();else gRenderCPU();}
+function gRender(){if(!G.land||!G.blur||!G.hi||!G.d||!gSize())return;gTheme();if(G.gl)gRenderGL();else gRenderCPU();}
 function gRenderCPU(){var N=G.N,R=G.R*G.zoom,cx=N/2,cy=N/2,u32=G.u32,C=G.cols,
   lam0=G.lon*D2R,ph1=G.lat*D2R,sp=Math.sin(ph1),cp=Math.cos(ph1),hb=G.d.hires.bbox,ppdw=1/(hb[2]-hb[0]),ppdh=1/(hb[3]-hb[1]),
   Lx=-.5,Ly=.5,Lz=.72,Ll=Math.sqrt(Lx*Lx+Ly*Ly+Lz*Lz);Lx/=Ll;Ly/=Ll;Lz/=Ll;
@@ -564,7 +583,7 @@ function gUI(){var d=G.d,ix=function(s){var p=s.split("-");return +p[0]*12+ +p[1
     li.innerHTML='<button type="button">'+(r.home?"Houston, TX":gLabel(r.p))+'</button><span class="dt">'+(r.home?"home base":gDate(r.p.date))+"</span>"+(r.home||!r.p.href?"":'<a href="'+r.p.href+'" aria-label="Read entry: '+gLabel(r.p)+'">entry →</a>');
     li.querySelector("button").addEventListener("click",function(){gSelect(r.id,true);});ul.appendChild(li);});
   document.getElementById("g-home").addEventListener("click",function(){G.selMonth=null;tl.querySelectorAll(".mc").forEach(function(x){x.classList.remove("sel");x.setAttribute("aria-pressed","false");});gShow(null);G.pinned=false;gFly(d.home.lon,d.home.lat,1.4);});
-  document.getElementById("g-ne").addEventListener("click",function(){gShow(null);G.pinned=false;gFit(d.places);});
+  
   document.getElementById("g-in").addEventListener("click",function(){gFly(G.lon,G.lat,G.zoom*1.8);});
   document.getElementById("g-out").addEventListener("click",function(){gFly(G.lon,G.lat,G.zoom/1.8);});
   var sp=document.getElementById("g-spin");if(reduce){G.paused=true;sp.hidden=true;}sp.addEventListener("click",function(){G.paused=!G.paused;sp.setAttribute("aria-pressed",G.paused);sp.textContent=G.paused?"Spin":"Pause spin";gKick();});}
@@ -628,7 +647,7 @@ function openReader(a){
   if(!reader||state!=="closed")return;state="opening";clearTimers();rbook.style.opacity="";rbook.style.transition="";reader.style.pointerEvents="";
   var li=a.closest("li");curLi=li;lastTrigger=a;a.setAttribute("aria-expanded","true");
   var d=li.dataset,cv=d.pal?' data-pal="'+esc(d.pal)+'"':"";
-  var leaves="";for(var k=1;k<=5;k++)leaves+='<div class="rd-leaf" style="--k:'+k+'"><i class="fr paper"></i><i class="bk paper">'+(k===5?'<b class="ruled">notes</b>':'')+'</i></div>';
+  var leaves="";for(var k=1;k<=5;k++)leaves+='<div class="rd-leaf" style="--k:'+k+'"><i class="fr paper"></i><i class="bk paper">'+(k===5?'<b class="ruled"><span class="rh">field record</span>'+(d.place?'<span><em>place</em>'+esc(d.place)+'</span>':'')+(d.coord?'<span><em>coord</em>'+esc(d.coord)+'</span>':'')+'<span><em>filed</em>'+esc(d.date)+'</span><span class="stamp">notes</span></b>':'')+'</i></div>';
   rbook.innerHTML='<span class="rd-shadow" aria-hidden="true"></span>'+
     '<div class="rd-page paper">'+
     '<h2 id="rd-title">'+esc(d.title)+'</h2><span class="dt">'+esc(d.date)+'</span>'+
@@ -686,19 +705,6 @@ if(reader){
       f[(i+(e.shiftKey?-1:1)+f.length)%f.length].focus();}});
 }
 
-/* ---------- terminal status typewriter ---------- */
-var st=document.getElementById("status-text");
-if(st){var lines=["somewhere above treeline [placeholder]","building things that scrape the web [placeholder]","planning the next loop hike [placeholder]"],li=0,ci=lines[0].length,dir=-1,sv=true,tm=0;
-  st.textContent=lines[0];   /* screen readers get the static #status-sr text; the animated copy is aria-hidden */
-  function step(){tm=0;if(!sv||document.hidden)return;var s=lines[li],dl=55;
-    if(dir>0){ci++;if(ci%3===0)Sound.play("tick");if(ci>=s.length){dir=0;dl=2600;}}
-    else if(dir<0){ci--;if(ci<=0){li=(li+1)%lines.length;dir=1;}}
-    else dir=-1;
-    st.textContent=lines[li].slice(0,ci);tm=setTimeout(step,dl);}
-  function go(){if(!reduce&&!tm&&sv&&!document.hidden)tm=setTimeout(step,2600);}
-  if(!reduce){if("IntersectionObserver" in window)new IntersectionObserver(function(es){sv=es[0].isIntersecting;if(sv)go();}).observe(st.parentNode);go();
-    document.addEventListener("visibilitychange",go);}
-}
 })();
 
 /* ---------- photo figures: dithered by default, "develops" to colour; click for lightbox ---------- */
