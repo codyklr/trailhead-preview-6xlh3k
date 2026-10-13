@@ -171,7 +171,7 @@ section.hero.wrap{padding-top:clamp(1.25rem,4vh,2.75rem);padding-bottom:0}
   -webkit-mask-image:linear-gradient(135deg,transparent 5%,#000 50%,transparent 100%);mask-image:linear-gradient(135deg,transparent 5%,#000 50%,transparent 100%)}
 .rd-book.up .rd-shadow{opacity:.42;transform:translateZ(-30px) translate(10px,16px) scale(1.05)}
 .rd-page,.rd-leaf,.rd-cover{position:absolute;inset:0;transform-origin:left center}
-.paper{background:var(--bg) url(assets/dither-paper.png?v=dcd30d7e) 0 0/calc(16*var(--dp)) calc(16*var(--dp));border:1px solid var(--ink)}
+.paper{background:var(--bg) url(assets/dither-paper.png?v=ce1be03f) 0 0/calc(16*var(--dp)) calc(16*var(--dp));border:1px solid var(--ink)}
 .rd-page{padding:1.6rem 1.4rem 1.4rem 1.9rem;display:flex;flex-direction:column;pointer-events:auto;overflow:hidden}
 .rd-page::before{content:"";position:absolute;left:0;top:0;bottom:0;width:7px;background:var(--ink)}
 .rd-page .eyebrow{margin-bottom:.9rem}.rd-page .eyebrow::after{display:none}
@@ -195,7 +195,7 @@ section.hero.wrap{padding-top:clamp(1.25rem,4vh,2.75rem);padding-bottom:0}
 .rd-face{position:absolute;left:0;top:0;display:block;transform-origin:0 0;background:var(--bg);border:1px solid var(--ink);box-sizing:border-box;color:var(--ink)}
 .rd-face::before{content:"";position:absolute;left:0;top:0;bottom:0;width:7px;background:var(--ink);opacity:.9;z-index:1}
 .rd-face img.pix,.rd-face canvas{border-bottom:1px solid var(--ink);margin-left:7px;width:calc(100% - 7px);box-sizing:border-box;display:block}
-.rd-cover>i.bk{transform:rotateY(180deg);background:var(--bg2) url(assets/dither-paper.png?v=dcd30d7e) 0 0/calc(16*var(--dp)) calc(16*var(--dp));border:1px solid var(--ink);font:11px/1.6 var(--pixel);text-transform:uppercase;padding:1.5rem;color:var(--muted);letter-spacing:.06em}
+.rd-cover>i.bk{transform:rotateY(180deg);background:var(--bg2) url(assets/dither-paper.png?v=ce1be03f) 0 0/calc(16*var(--dp)) calc(16*var(--dp));border:1px solid var(--ink);font:11px/1.6 var(--pixel);text-transform:uppercase;padding:1.5rem;color:var(--muted);letter-spacing:.06em}
 .rd-close{position:absolute;top:1rem;right:1rem;pointer-events:auto;background:var(--bg)}
 @media(max-width:720px){.rd-book{--shift:0px;--W:min(340px,88vw);--H:calc(var(--W)*1.5)}.rd-close{top:.6rem;right:.6rem}
   .rd-page{padding:1.6rem 1.3rem 1.4rem 1.7rem}.rd-page p{font-size:16.5px}.rd-page .stats2{flex-wrap:wrap;gap:.3rem 1rem;font-size:12.5px}
@@ -452,7 +452,7 @@ main.nf .eyebrow{margin-top:0}
 .atlas .shelf>li{flex:none;width:min(100%,290px);margin:0 0 0 6%}
 .atlas .shelf>li:nth-child(even){margin:0 6% 0 auto}
 /* ordered-Bayer dither fade on the scroller edges (baked masks from tools/make_fade.py; union of 3 layers, so no mask-composite needed) */
-.fade{--s:linear-gradient(#000,#000);--ft:url(assets/dither-ft.png?v=dcd30d7e);--fb:url(assets/dither-fb.png?v=dcd30d7e);--F:calc(16*var(--dp));--m1:var(--ft);--m3:var(--fb);
+.fade{--s:linear-gradient(#000,#000);--ft:url(assets/dither-ft.png?v=ce1be03f);--fb:url(assets/dither-fb.png?v=ce1be03f);--F:calc(16*var(--dp));--m1:var(--ft);--m3:var(--fb);
   -webkit-mask-image:var(--m1),var(--s),var(--m3);mask-image:var(--m1),var(--s),var(--m3);
   -webkit-mask-size:calc(8*var(--dp)) var(--F),100% calc(100% - 2*var(--F)),calc(8*var(--dp)) var(--F);mask-size:calc(8*var(--dp)) var(--F),100% calc(100% - 2*var(--F)),calc(8*var(--dp)) var(--F);
   -webkit-mask-position:0 0,0 var(--F),0 100%;mask-position:0 0,0 var(--F),0 100%;
@@ -474,7 +474,7 @@ li.act .book{transition:transform .16s ease-out}
   .atlas .shelf>li,.atlas .shelf>li:nth-child(even){width:min(62vw,250px);margin:0 1.6rem 0 0}
   .atlas-map .gside{order:3;margin-top:1.2rem}
   .atlas-map .gl{display:block}
-  .fade{--ft:url(assets/dither-flm.png?v=dcd30d7e);--fb:url(assets/dither-frm.png?v=dcd30d7e);
+  .fade{--ft:url(assets/dither-flm.png?v=ce1be03f);--fb:url(assets/dither-frm.png?v=ce1be03f);
     -webkit-mask-size:var(--F) calc(8*var(--dp)),calc(100% - 2*var(--F)) 100%,var(--F) calc(8*var(--dp));mask-size:var(--F) calc(8*var(--dp)),calc(100% - 2*var(--F)) 100%,var(--F) calc(8*var(--dp));
     -webkit-mask-position:0 0,var(--F) 0,100% 0;mask-position:0 0,var(--F) 0,100% 0;
     -webkit-mask-repeat:repeat-y,no-repeat,repeat-y;mask-repeat:repeat-y,no-repeat,repeat-y}
@@ -570,24 +570,41 @@ nav.crumbs{display:block;margin:0 0 1.2rem;padding:0;border:0;grid-area:auto;gap
 .entry-top nav.crumbs{margin:0}
 .back-top{font:12px var(--mono);display:inline-flex;align-items:center;min-height:24px;text-decoration:underline;text-decoration-color:var(--accent);text-underline-offset:3px}
 @media(max-width:720px){.back-top{min-height:44px}.entry-top{gap:0 1rem}}
-/* narrow screens: the open notebook is a full two-page spread scaled to fit the width (it used to keep only the
-   right page centred and push the left page off-screen). Pages get compact type so both stay readable. */
-@media(max-width:720px){
-  .rd-book{--W:min(calc((100vw - 1.6rem)/2),calc((100dvh - 8rem)/1.45));--shift:calc(var(--W)/2)}
-  .rd-page{padding:.9rem .7rem .8rem 1.05rem}
-  .rd-page .eyebrow{display:none}
-  .rd-page h2{font-size:clamp(1.25rem,6vw,1.6rem);line-height:1;margin-bottom:.3rem}
-  .rd-page .dt{font-size:10px}
-  .rd-page p{font-size:13px;line-height:1.45;margin:.4rem 0 .6rem;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:7}
-  .rd-page .stats2{font-size:11px;margin:.4rem 0;padding:.3rem 0}
-  .rd-page .read{font-size:12px;padding:0 .7rem;min-height:44px;margin-top:auto;align-self:flex-start}
-  .ruled{inset:.9rem .7rem .8rem .8rem;font-size:10px;line-height:2.2}
-  .ruled span{flex-direction:column;gap:0;line-height:1.1;margin-bottom:.55rem;white-space:normal}
-  .ruled span em{min-width:0;font-size:9.5px}
-  .ruled .rh{margin-bottom:.8rem}
-  .ruled .stamp{font-size:10px;padding:.3rem .4rem}
-}
 /* once landed, the flipped cover is fully under the leaves; hide it so WebKit's 3D depth sorting (pages a few px
    apart) can never paint the cover's back over the field-record page. It returns as soon as closing starts. */
 .rd-book.landed .rd-cover{visibility:hidden}
-@media(max-width:720px){.ruled .stamp{right:.3rem;bottom:.2rem;font-size:9.5px;padding:.25rem .35rem}}
+/* phones: a flip book. The cover swings open as usual, then ONE full-size page shows at a time: the entry page
+   first, the field record under it. Turning rotates the entry page around the spine (swipe with the page following the
+   finger, or the corner controls). The book is flattened once landed so no 3D depth sorting can mis-order pages (WebKit);
+   the turning page shows a blank paper back past 90 degrees instead of mirrored text. */
+.rd-rec,.rd-pager{display:none}
+@media(max-width:720px){
+  .rd-book{--W:min(340px,calc(100vw - 2.4rem),calc((100dvh - 11rem) / 1.42));--shift:0px}
+  .rd-rec{display:block;position:absolute;inset:0;border:1px solid var(--ink);box-sizing:border-box;opacity:0;pointer-events:none}
+  .rd-rec::before{content:"";position:absolute;left:0;top:0;bottom:0;width:7px;background:var(--ink);z-index:1}
+  .rd-rec .ruled{transform:none;inset:1.6rem 1.2rem 1.4rem 1.6rem}
+  .rd-book.landed{transform-style:flat;perspective:1500px;touch-action:pan-y}
+  .rd-book.landed .rd-rec{opacity:1}
+  .rd-book.landed .rd-leaf{visibility:hidden}
+  .rd-book.landed .rd-page{transform-origin:left center;transform:rotateY(var(--turn,0deg));transition:transform .5s cubic-bezier(.3,.7,.2,1);will-change:transform}
+  .rd-book.landed .rd-page.drag{transition:none}
+  .rd-book.landed .rd-page.past{background-image:none}
+  .rd-book.landed .rd-page.past>*,.rd-book.landed .rd-page.past::before{visibility:hidden}
+  .rd-book.landed .rd-page.gone{visibility:hidden}
+  .rd-book.landed .rd-page::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(to left,rgba(0,0,0,.18),transparent 40%);opacity:var(--shade,0)}
+  .rd-pager{position:absolute;left:50%;bottom:max(1rem,env(safe-area-inset-bottom));transform:translateX(-50%);display:flex;align-items:center;gap:.4rem;pointer-events:auto;z-index:4}
+  .rd-pager[hidden]{display:none}
+  .rd-pager button{min-width:44px;min-height:44px;font:500 18px var(--mono);background:var(--bg);border:1px solid var(--ink);color:var(--ink);cursor:pointer}
+  .rd-pager button:disabled{opacity:.35;cursor:default}
+  .rd-pager .rd-pn{font:11px var(--pixel);letter-spacing:.12em;color:var(--muted);min-width:3.5rem;text-align:center}
+}
+.crumbs a i{display:inline!important;font-style:normal;color:var(--accent);margin-right:.4rem}
+article.entry p.eyebrow.entry-no{margin:0 0 .4rem}
+article.entry p.eyebrow.entry-no::after{display:none}
+/* pages of the open notebook are selectable text */
+.rd-book.landed .rd-page,.rd-book.landed .rd-rec,.rd-book.landed .rd-leaf>i{pointer-events:auto;-webkit-user-select:text;user-select:text;cursor:text}
+.rd-book.landed .rd-page .read{cursor:pointer}
+/* closing: the leaves settle first, and once the cover has swung past the spine everything under it is hidden, so no
+   page (or the cover's own back face, where WebKit ignores backface-visibility) can paint over the cover */
+.rd-book.closing .rd-leaf{transition-delay:calc((5 - var(--k))*.025s);transition-duration:.36s}
+.rd-book.closing.shut .rd-leaf,.rd-book.closing.shut .rd-page,.rd-book.closing.shut .rd-rec,.rd-book.closing.shut .rd-cover>i.bk{visibility:hidden}

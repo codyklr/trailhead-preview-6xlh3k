@@ -647,8 +647,9 @@ function openReader(a,instant){
   if(!reader||state!=="closed")return;state="opening";clearTimers();rbook.style.opacity="";rbook.style.transition="";reader.style.pointerEvents="";
   var li=a.closest("li");curLi=li;lastTrigger=a;a.setAttribute("aria-expanded","true");
   var d=li.dataset,cv=d.pal?' data-pal="'+esc(d.pal)+'"':"";
-  var leaves="";for(var k=1;k<=5;k++)leaves+='<div class="rd-leaf" style="--k:'+k+'"><i class="fr paper"></i><i class="bk paper">'+(k===5?'<b class="ruled"><span class="rh">field record</span>'+(d.place?'<span><em>place</em>'+esc(d.place)+'</span>':'')+(d.coord?'<span><em>coord</em>'+esc(d.coord)+'</span>':'')+'<span><em>filed</em>'+esc(d.date)+'</span><span class="stamp">notes</span></b>':'')+'</i></div>';
-  rbook.innerHTML='<span class="rd-shadow" aria-hidden="true"></span>'+
+  var rec='<b class="ruled"><span class="rh">field record</span>'+(d.place?'<span><em>place</em>'+esc(d.place)+'</span>':'')+(d.coord?'<span><em>coord</em>'+esc(d.coord)+'</span>':'')+'<span><em>filed</em>'+esc(d.date)+'</span><span class="stamp">notes</span></b>';
+  var leaves="";for(var k=1;k<=5;k++)leaves+='<div class="rd-leaf" style="--k:'+k+'"><i class="fr paper"></i><i class="bk paper">'+(k===5?rec:'')+'</i></div>';
+  rbook.innerHTML='<span class="rd-shadow" aria-hidden="true"></span><div class="rd-rec paper" aria-hidden="true">'+rec+'</div>'+
     '<div class="rd-page paper">'+
     '<h2 id="rd-title">'+esc(d.title)+'</h2><span class="dt">'+esc(d.date)+'</span>'+
     '<div class="stats2"'+(d.stats?'':' hidden')+'><span>'+esc(d.stats||"")+'</span></div>'+
@@ -665,7 +666,7 @@ function openReader(a,instant){
     [].forEach.call(fr.querySelectorAll("img"),function(im){im.loading="eager";});}
   document.querySelector("main").setAttribute("inert","");document.body.style.overflow="hidden";
   build(true);
-  function land(){Sound.play("land");state="open";rbook.classList.add("landed");var rl=rbook.querySelector(".read");if(rl)rl.focus({preventScroll:true});}
+  function land(){Sound.play("land");state="open";rbook.classList.add("landed");pageReset();var rl=rbook.querySelector(".read");if(rl)rl.focus({preventScroll:true});}
   dialog.focus({preventScroll:true});
   if(reduce||instant){li.classList.add("away");rbook.classList.add("open","up");reader.classList.add("on");land();return;}
   /* phase 0: place the reader book exactly over the shelf book (no transition) */
@@ -677,6 +678,7 @@ function openReader(a,instant){
   later(function(){rbook.classList.add("open");Sound.play("cover");for(var k=1;k<=5;k++)later(function(){Sound.play("flip");},(.28+k*.075)*1000+60);later(land,1150);},720);
 }
 function closeReader(){
+  if(pager)pager.hidden=true;if(pgEl()){pgEl().classList.remove("past","gone");pgEl().style.removeProperty("--turn");}
   if(!reader||reader.hidden||state==="closing"||state==="closed")return;state="closing";clearTimers();
   try{if(history.state&&history.state.spa==="home"&&history.state.book!=null)history.replaceState({spa:"home"},"");}catch(e){}
   var a=lastTrigger,li=curLi;
@@ -691,17 +693,66 @@ function closeReader(){
   if(reduce){finish();return;}
   var wasOpen=rbook.classList.contains("open");
   /* phase 1: cover and pages close */
-  rbook.classList.remove("landed");rbook.classList.remove("open");if(wasOpen)Sound.play("close");
+  rbook.classList.remove("landed");rbook.classList.remove("open");if(wasOpen){Sound.play("close");rbook.classList.add("closing");later(function(){rbook.classList.add("shut");},460);}
   /* phase 2: float back down, shrink, settle into the exact resting spot and tilt */
   later(function(){
     Sound.play("down");if(a){a.style.transition="none";a.style.transform=restPose(a);}flyEl.style.transform=flipTransform(a);rbook.classList.add("pre");rbook.classList.remove("up");reader.classList.remove("on");
     later(finish,740);},wasOpen?760:0);
 }
+/* ---- phones: flip book (one page at a time: 1 = entry page, 2 = field record) ---- */
+var pager=document.getElementById("rd-pager"),pgN=1,pgT=[];
+function pgEl(){return rbook.querySelector(".rd-page");}
+function flipOn(){return mobileNow()&&rbook.classList.contains("landed");}
+function setTurn(deg){var p=pgEl();if(!p)return;p.style.setProperty("--turn",deg+"deg");p.classList.toggle("past",deg<-90);
+  p.style.setProperty("--shade",(Math.sin(-deg*Math.PI/180)*.9).toFixed(3));}
+function pagerUI(){if(!pager)return;var pv=pager.querySelector(".rd-prev"),nx=pager.querySelector(".rd-next");
+  pager.querySelector(".rd-pn").textContent=pgN+" / 2";pv.disabled=pgN===1;nx.disabled=pgN===2;
+  var ae=document.activeElement;if((ae===pv&&pgN===1)||(ae===nx&&pgN===2))(pgN===1?nx:pv).focus({preventScroll:true});
+  pv.setAttribute("aria-label","Previous page: entry");nx.setAttribute("aria-label","Next page: field record");
+  var p=pgEl(),r=rbook.querySelector(".rd-rec");if(p){if(pgN===2)p.setAttribute("inert","");else p.removeAttribute("inert");}
+  if(r)r.setAttribute("aria-hidden",String(pgN!==2));}
+function setPage(n,instant,quiet){var p=pgEl();if(!p)return;pgT.forEach(clearTimeout);pgT=[];pgN=n;
+  var fast=instant||reduce;p.classList.remove("drag");if(fast){p.style.transition="none";}else p.style.transition="";
+  if(n===2){setTurn(-180);if(fast)p.classList.add("gone");else pgT.push(setTimeout(function(){p.classList.add("gone");},500));}
+  else{p.classList.remove("gone");setTurn(0);}
+  if(fast){void p.offsetWidth;p.style.transition="";}
+  pagerUI();if(!quiet){if(!fast)Sound.play("flip");if(typeof say==="function")say("Page "+n+" of 2, "+(n===1?"entry":"field record"));}}
+function pageReset(){pgN=1;if(pager)pager.hidden=!mobileNow();var p=pgEl();if(p){p.classList.remove("past","gone","drag");p.style.removeProperty("--turn");p.style.removeProperty("--shade");}pagerUI();}
+if(pager){pager.addEventListener("click",function(e){var b=e.target.closest("button");if(!b||b.disabled)return;e.stopPropagation();setPage(b.classList.contains("rd-next")?2:1);});}
+/* swipe: the page follows the finger horizontally; vertical moves are left to the browser (touch-action:pan-y) */
+var sw=null,swUsed=false;
+if(rbook){
+rbook.addEventListener("pointerdown",function(e){if(!flipOn()||e.pointerType==="mouse")return;sw={x:e.clientX,y:e.clientY,id:e.pointerId,on:false,w:rbook.offsetWidth,t:e.timeStamp};});
+rbook.addEventListener("pointermove",function(e){if(!sw||e.pointerId!==sw.id)return;var dx=e.clientX-sw.x,dy=e.clientY-sw.y;
+  if(!sw.on){if(Math.abs(dx)<10&&Math.abs(dy)<10)return;if(Math.abs(dx)<Math.abs(dy)*1.2){sw=null;return;}sw.on=true;pgEl().classList.add("drag");pgEl().classList.remove("gone");
+    try{rbook.setPointerCapture(e.pointerId);}catch(_){}}
+  var base=pgN===1?0:-180,deg=Math.max(-180,Math.min(0,base+dx/sw.w*180));setTurn(deg);sw.deg=deg;sw.dx=dx;});
+function swEnd(e){if(!sw||e.pointerId!==sw.id)return;var s0=sw;sw=null;if(!s0.on)return;swUsed=true;setTimeout(function(){swUsed=false;},350);
+  var v=s0.dx/Math.max(1,e.timeStamp-s0.t),to=s0.deg<-90?2:1;if(Math.abs(s0.dx)>40&&Math.abs(v)>.35)to=s0.dx<0?2:1;
+  pgEl().classList.remove("drag");setPage(to,false,to===pgN&&false);}
+rbook.addEventListener("pointerup",swEnd);rbook.addEventListener("pointercancel",swEnd);
+}
 if(reader){
-  reader.addEventListener("click",function(e){if(e.target.hasAttribute&&e.target.hasAttribute("data-close")||e.target===dialog)closeReader();});
+  /* close only via the close button, Esc, or a click that both starts and ends outside the notebook (so selecting text
+     on a page, or a selection drag that ends outside, never closes it). Pages ignore pointer events for layout reasons,
+     so "inside" is decided by the visible page rectangles, not by the event target. */
+  function inBook(x,y){var els=[].slice.call(rbook.querySelectorAll(".rd-page,.rd-rec,.rd-cover>i.fr,.rd-leaf>i"));
+    return els.some(function(el){var cs=getComputedStyle(el);if(cs.visibility==="hidden"||cs.display==="none"||+cs.opacity===0)return false;
+      if(el.closest(".rd-leaf")&&+getComputedStyle(el.closest(".rd-leaf")).opacity===0)return false;
+      var r=el.getBoundingClientRect();return r.width&&x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom;});}
+  var downOut=false;
+  reader.addEventListener("pointerdown",function(e){downOut=!e.target.closest(".rd-close")&&!inBook(e.clientX,e.clientY);});
+  reader.addEventListener("click",function(e){
+    if(e.target.closest&&e.target.closest(".rd-close")){closeReader();return;}
+    if(swUsed)return;
+    if(e.target.closest&&e.target.closest("a,button"))return;
+    var sel=window.getSelection&&String(window.getSelection());
+    if(downOut&&!inBook(e.clientX,e.clientY)&&!sel)closeReader();
+    downOut=false;});
+  document.addEventListener("keydown",function(e){if(flipOn()&&!reader.hidden&&(e.key==="ArrowRight"||e.key==="ArrowLeft")&&!(e.target.closest&&e.target.closest("input,textarea"))){e.preventDefault();setPage(e.key==="ArrowRight"?2:1);}});
   reader.addEventListener("keydown",function(e){
     if(e.key==="Escape"){e.preventDefault();closeReader();}
-    if(e.key==="Tab"){var f=[].slice.call(reader.querySelectorAll(".read,.rd-close"));if(!f.length)return;
+    if(e.key==="Tab"){var f=[].slice.call(reader.querySelectorAll(".read,.rd-pager button,.rd-close")).filter(function(x){return !x.disabled&&!x.closest("[inert],[hidden]")&&x.offsetParent!==null;});if(!f.length)return;
       var i=f.indexOf(document.activeElement);e.preventDefault();
       f[(i+(e.shiftKey?-1:1)+f.length)%f.length].focus();}});
 }
@@ -741,8 +792,8 @@ function showEntry(doc,href,push,fromBook){
   var page=reader.hidden?null:rbook.querySelector(".rd-page");spa.sheetFrom=page?page.getBoundingClientRect():null;spa.dir="fwd";
   setName(page,true);
   run(function(){
-    setName(page,false);spa.homeY=scrollY;spa.book=fromBook?lastTrigger:null;
-    if(push){try{history.replaceState({spa:"home",book:bookIndex(spa.book),y:spa.homeY},"");}catch(e){}history.pushState({spa:"entry",href:href},"",href);}
+    setName(page,false);spa.homeY=scrollY;spa.book=fromBook?lastTrigger:null;spa.pg=pgN;
+    if(push){try{history.replaceState({spa:"home",book:bookIndex(spa.book),y:spa.homeY,pg:pgN},"");}catch(e){}history.pushState({spa:"entry",href:href},"",href);}
     if(!reader.hidden)closeInstant();
     /* main/footer from the entry page; relative URLs in it now resolve against the pushed URL */
     var m=document.importNode(main,true),f=foot?document.importNode(foot,true):null;
@@ -763,7 +814,7 @@ function showHome(hash){
     build();kick();
     if(hash){try{history.replaceState({spa:"home"},"",HOME+hash);}catch(e){}var t=document.getElementById(hash.slice(1));if(t){t.scrollIntoView({behavior:"instant"});}spa.book=null;return;}
     window.scrollTo({top:spa.homeY,left:0,behavior:"instant"});
-    if(b){reader.classList.add("instant");openReader(b,true);void rbook.offsetWidth;var pg=rbook.querySelector(".rd-page");setName(pg,true);spa.sheetFrom=pg&&pg.getBoundingClientRect();}
+    if(b){reader.classList.add("instant");openReader(b,true);if(spa.pg===2)setPage(2,true,true);void rbook.offsetWidth;var pg=rbook.querySelector(".rd-page");setName(pg,true);spa.sheetFrom=pg&&pg.getBoundingClientRect();}
     else homeMain.focus&&homeMain.setAttribute("tabindex","-1"),homeMain.focus({preventScroll:true});
   },function(){var pg=rbook.querySelector(".rd-page");setName(pg,false);requestAnimationFrame(function(){requestAnimationFrame(function(){reader.classList.remove("instant");});});spa.busy=false;say(b?"Home. Journal reopened.":"Home");});}
 spa.homeTitle=document.title;
@@ -773,7 +824,7 @@ function bookIndex(a){var all=shelf?[].slice.call(shelf.querySelectorAll(".book"
 function restoreFromState(){var st=history.state;if(!st||st.spa!=="home"||st.book==null||spa.view||!reader||!reader.hidden)return;
   var a=shelf&&shelf.querySelectorAll(".book")[st.book];if(!a)return;
   if(st.y!=null)window.scrollTo({top:st.y,left:0,behavior:"instant"});
-  reader.classList.add("instant");openReader(a,true);void rbook.offsetWidth;
+  reader.classList.add("instant");openReader(a,true);if(st.pg===2)setPage(2,true,true);void rbook.offsetWidth;
   requestAnimationFrame(function(){requestAnimationFrame(function(){reader.classList.remove("instant");});});say("Journal reopened.");}
 /* a page that is not the homepage owns no soft-nav states. WebKit can deliver Back to the homepage entry as a
    same-document popstate here (after the entry was reloaded), changing the URL but not the page: load it for real */
